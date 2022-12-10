@@ -28,7 +28,7 @@ And let's say the 3 new movies you're deciding between are:
 You were able to get a response from 3 of your friends: Hyun, Eric, and Chunru. They weren't able to provide ratings for all 7 movies, but you were still able to summarize their responses in a simple table:
 
 |        | WM1 | WM2 | WM3 | WM4 | NM1 | NM2 | NM3 |
-|--------|-----|-----|-----|-----|-----|-----|-----|
+|--------|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
 | Hyun   | 5   |     | 3   | 2   | 1   | 4   | 3   |
 | Eric   |     | 4   |     | 5   |     | 2   | 5   |
 | Chunru | 3   | 1   |     | 4   | 5   |     | 3   |
@@ -36,7 +36,7 @@ You were able to get a response from 3 of your friends: Hyun, Eric, and Chunru. 
 In order to compare, you added your ratings to the table as well. The final table will look like this:
 
 |        | WM1 | WM2 | WM3 | WM4 | NM1 | NM2 | NM3 |
-|--------|-----|-----|-----|-----|-----|-----|-----|
+|--------|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
 | Hyun   | 5   |     | 3   | 2   | 1   | 4   | 3   |
 | Eric   |     | 4   |     | 5   |     | 2   | 5   |
 | Chunru | 3   | 1   |     | 4   | 5   |     | 3   |
@@ -63,13 +63,36 @@ We mentioned earlier that recommendation systems are being applied in different 
 2. Product Recommendations - Online shopping is another one of the avenues where recommendation systems are very useful. Users receive suggestions on products to buy based on what similar users are buying.
 3. News Articles - Another example of recommendation systems are with news articles where readers will receive suggestions on articles that they may find interesting.
 
-There are definitely are more examples but these should be able to provide an idea of the vastness of use cases where recommendation systems can be applied. 
+There are definitely are more examples but these should be able to provide an idea of the vastness of use cases where recommendation systems can be applied. Alternatively, recommendation systems
 
 ## The Utility Matrix
 
+Recall the table we created earlier for the initial example where the different friends had their ratings for different movies. That table is a good representation of the utility matrix:
+
+|        | WM1 | WM2 | WM3 | WM4 | NM1 | NM2 | NM3 |
+|--------|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+| Hyun   | 5   |     | 3   | 2   | 1   | 4   | 3   |
+| Eric   |     | 4   |     | 5   |     | 2   | 5   |
+| Chunru | 3   | 1   |     | 4   | 5   |     | 3   |
+| You    | 4   | 2   | 3   | 5   |     |     |     |
+
+Typically, recommendation systems have two types of entities: *users* and *entities*. The utility matrix represents the degree of preference that a user has for certain items. In our example, the degree of preference is measured on a movie rating scale of 1 to 5. It is also important to note that it is assumed that the utility matrix is sparse, meaning there are blank values in the matrix. This is good to replicate the real-world scenario where not all users would have a degree of preference for all of the items.
+
+The goal of recommendation systems is to fill out the utility matrix by predicting values for the blank ones. Alternatively, recommendation systems can also predict the values for some entries in each row which are expected to have higher values. This would make it so that the recommendation system does not have to fill out all of the empty cells but just a large subset of cells (Ullman).
+
 ## The Long Tail
 
+After learning a little bit about the concept of recommendation systems, it is also important to understand why these systems are necessary in technology nowadays. To picture this, we can look at a physical example. Keeping within the movie example, let's say we have a store that sells physical copies of movies. These stores tend to only sell the more popular movies. Online stores, on the other hand, would have more movies at their disposal. Recommendation systems help to recommend these less popular movies to users so that they can also be sold.
+
+This is the long tail phenomenon, where physical stores only sell the more popular products. Recommendation systems help to present a wider range of options (Ullman).
+
+![alt text](Long_Tail.png "The Long Tail")
+
 ## Collaborative Filtering
+
+Recommendation systems can be implemented using different techniques, but for this tutorial we will be focusing on collaborative filtering. This technique focuses more on the similarity of users with each other instead of similarity of features between items. This follows the intuition that similar users will tend to prefer similar items and thus the recommendations are based off of this idea (Ullman).
+
+Before implementing collaborative filtering recommendation systems, we will first discuss the mathematical theory that works in the background.
 
 # Mathematical Theory
 
@@ -84,7 +107,9 @@ library(tidyverse) # functions for data manipulation
 
 # Coding Example (Python)
 
+# References
 
+Ullman, J., Leskovec, J., Rajaraman, A., (2012, July 4). Mining Massive Datasets. Cambridge University Press. Retrieved December 7, 2022, from http://infolab.stanford.edu/~ullman/mmds/book.pdf 
 
 
 
