@@ -1,0 +1,96 @@
+---
+title: "Collaborative Filtering Recommendation Systems Tutorial" 
+authors: "Hyun Ko, Eric Tria, Chunru Zheng"
+date: "Due: Wed Dec 14 | 12:00pm"
+output: R6030::homework
+---
+
+**DS 6030 | Fall 2022 | University of Virginia**
+
+------------------------------------------------------------------------
+
+```{r config, echo=FALSE}
+source(system.file("config/hw_config.R", package="R6030")) # knitr settings
+options(dplyr.summarise.inform = FALSE)  # ignore dplyr message about grouping
+```
+
+
+# Intro
+
+Let's suppose it's 2010 and you've just finished watching a collection of 4 movies on your handy DVD player. You still have some free time left and you decide that you want to spend the remainder of your time watching more movies. You have 3 other DVDs lying around, but you do not know which one will be good to watch - a travesty! In order to resolve this, you call up some of your closest friends and ask them to rate the DVD options that you have. While you're at it, you ask your friends to also rate the movies you already watched. 
+
+Let's say there are 4 movies that you already watched: 
+- WM1, WM2, WM3, WM4
+
+And let's say the 3 new movies you're deciding between are:
+- NM1, NM2, NM3
+
+You were able to get a response from 3 of your friends: Hyun, Eric, and Chunru. They weren't able to provide ratings for all 7 movies, but you were still able to summarize their responses in a simple table:
+
+|        | WM1 | WM2 | WM3 | WM4 | NM1 | NM2 | NM3 |
+|--------|-----|-----|-----|-----|-----|-----|-----|
+| Hyun   | 5   |     | 3   | 2   | 1   | 4   | 3   |
+| Eric   |     | 4   |     | 5   |     | 2   | 5   |
+| Chunru | 3   | 1   |     | 4   | 5   |     | 3   |
+
+In order to compare, you added your ratings to the table as well. The final table will look like this:
+
+|        | WM1 | WM2 | WM3 | WM4 | NM1 | NM2 | NM3 |
+|--------|-----|-----|-----|-----|-----|-----|-----|
+| Hyun   | 5   |     | 3   | 2   | 1   | 4   | 3   |
+| Eric   |     | 4   |     | 5   |     | 2   | 5   |
+| Chunru | 3   | 1   |     | 4   | 5   |     | 3   |
+| You    | 4   | 2   | 3   | 5   |     |     |     |
+
+Given this information, will you be able to decide on which movie to watch next? The answer is yes! Thankfully, it's 2022 and this concept has been around for a while now. Even more so, this concept is applied in technology through applications that predict which options a user will choose. These applications are called **Recommendation Systems**.
+
+This tutorial will go through the concept of Recommendation Systems, specifically the technique of **Collaborative Filtering**. The following will be discussed:
+
+1. Background of Concepts
+2. Mathematical Theory
+3. Coding Example (R)
+4. Coding Example (Python)
+
+# Background of Concepts
+
+Before jumping into the math, it is important to go through some examples of recommendation systems as well as the concepts of the *Utility Matrix* and the *Long Tail*.
+
+## Recommendation Systems
+
+We mentioned earlier that recommendation systems are being applied in different technologies nowadays (Ullman). Some of these are:
+
+1. Movie Recommendations - Like the initial example, recommending movies is one of the most popular examples for recommendation systems. Streaming services such as Netflix, Hulu, Disney, and others all provide recommendations for their users to try. 
+2. Product Recommendations - Online shopping is another one of the avenues where recommendation systems are very useful. Users receive suggestions on products to buy based on what similar users are buying.
+3. News Articles - Another example of recommendation systems are with news articles where readers will receive suggestions on articles that they may find interesting.
+
+There are definitely are more examples but these should be able to provide an idea of the vastness of use cases where recommendation systems can be applied. 
+
+## The Utility Matrix
+
+## The Long Tail
+
+## Collaborative Filtering
+
+# Mathematical Theory
+
+# Coding Example (R)
+
+::: {.solution}
+```{r packages, message=FALSE, warning=FALSE}
+library(R6030)     # functions for DS 6030
+library(tidyverse) # functions for data manipulation   
+```
+:::
+
+# Coding Example (Python)
+
+
+
+
+
+
+
+
+
+
+
