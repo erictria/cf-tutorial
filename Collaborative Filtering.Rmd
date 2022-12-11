@@ -102,15 +102,84 @@ Before implementing collaborative filtering recommendation systems, we will firs
 ```{r packages, message=FALSE, warning=FALSE}
 library(R6030)     # functions for DS 6030
 library(tidyverse) # functions for data manipulation   
+library(recommenderlab)
 ```
 :::
 
+::: {.solution}
+```{r packages, message=FALSE, warning=FALSE}
+movie_ratings <- data.frame(
+  WM1 = c(5, NA, 3, 4), 
+  WM2 = c(NA, 4, 1, 2),
+  WM3 = c(3, NA, NA, 3),
+  WM4 = c(2, 5, 4, 5),
+  NM1 = c(1, NA, 5, NA),
+  NM2 = c(4, 2, NA, NA),
+  NM3 = c(3, 5, 3, NA)
+)
+rownames(movie_ratings) <- c('Hyun', 'Eric', 'Chunru', 'You')
+movie_ratings
+```
+
+```{r}
+#min(movie_ratings[][], na.rm = TRUE)
+#max(movie_ratings[][], na.rm = TRUE)
+
+hist(as.vector(as.matrix(movie_ratings)), main = "Distribution of Movie Ratings",
+     col = "yellow", xlab = "Ratings")
+```
+```{r}
+# convert the jester data frame to a matrix
+rmat <- as.matrix(movie_ratings)
+
+# convert matrix to a recommenderlab realRatingMatrix
+rmat <- as(rmat,"realRatingMatrix")
+```
+
+Cosine similarity
+```{r}
+# non-normalized
+reco <- Recommender(rmat, "UBCF", 
+      param=list(normalize = NULL, method="Cosine"))
+
+# centered
+reco_centered <- Recommender(rmat, "UBCF", 
+      param=list(normalize = "center",method="Cosine"))
+
+# Z-score normalization
+reco_z_score <- Recommender(rmat, "UBCF", 
+      param=list(normalize = "Z-score",method="Cosine"))
+```
+
+```{r}
+predictions <- predict(reco, rmat, type="ratings")
+predictions@data
+
+predictions_centered <- predict(reco_centered, rmat, type="ratings")
+predictions_centered@data
+
+predictions_z_score <- predict(reco_z_score, rmat, type="ratings")
+predictions_z_score@data
+```
+
+UV decomposition
+```{r}
+# not working yet ?
+fsvd <- funkSVD(x = rmat, k = 3, verbose = TRUE)
+uv_preds <- predict(fsvd, rmat, verbose = TRUE)
+uv_preds
+```
+
+:::
 # Coding Example (Python)
 
 # References
 
 Ullman, J., Leskovec, J., Rajaraman, A., (2012, July 4). Mining Massive Datasets. Cambridge University Press. Retrieved December 7, 2022, from http://infolab.stanford.edu/~ullman/mmds/book.pdf 
 
+https://towardsdatascience.com/recommendation-systems-using-uv-decomposition-a1d4116be4a1
+
+https://rpubs.com/jt_rpubs/285729
 
 
 
