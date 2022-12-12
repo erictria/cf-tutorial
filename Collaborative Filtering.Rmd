@@ -120,6 +120,37 @@ movie_ratings <- data.frame(
 rownames(movie_ratings) <- c('Hyun', 'Eric', 'Chunru', 'You')
 movie_ratings
 ```
+```{r}
+cosine_similarity <- function(vec_1, vec_2) {
+  vec_len <- length(vec_1)
+  
+  vec_1[is.na(vec_1)] <- 0
+  vec_2[is.na(vec_2)] <- 0
+  
+  vec_1_denom <- sqrt(sum(vec_1^2))
+  vec_2_denom <- sqrt(sum(vec_2^2))
+  denom <- vec_1_denom * vec_2_denom
+  print(denom)
+  
+  tib = tibble(vec_1 = vec_1, vec_2 = vec_2)
+  tib <- tib %>% mutate(products = vec_1 * vec_2)
+  print(tib)
+  numerator <- sum(tib$products)
+  
+  return (numerator / denom)
+}
+```
+
+```{r}
+sqrt(5^2 + 3^2 + 2^2 + 1^2 + 4^2 + 3^2)
+```
+
+```{r}
+eric <- as.numeric(as.vector(movie_ratings['Eric',]))
+hyun <- as.numeric(as.vector(movie_ratings['Hyun',]))
+cosine_similarity(eric, hyun)
+```
+
 
 ```{r}
 #min(movie_ratings[][], na.rm = TRUE)
@@ -142,6 +173,10 @@ Cosine similarity
 reco <- Recommender(rmat, "UBCF", 
       param=list(normalize = NULL, method="Cosine"))
 
+# uv
+reco_uv <- Recommender(rmat, "SVDF", 
+      param=list(k = 4, gamma = 0.015, lambda = 0.001, min_improvement = 1e-06, min_epochs = 50, max_epochs = 200))
+
 # centered
 reco_centered <- Recommender(rmat, "UBCF", 
       param=list(normalize = "center",method="Cosine"))
@@ -155,6 +190,9 @@ reco_z_score <- Recommender(rmat, "UBCF",
 predictions <- predict(reco, rmat, type="ratings")
 predictions@data
 
+predictions_uv <- predict(reco_uv, rmat, type="ratings")
+predictions_uv@data
+
 predictions_centered <- predict(reco_centered, rmat, type="ratings")
 predictions_centered@data
 
@@ -165,9 +203,74 @@ predictions_z_score@data
 UV decomposition
 ```{r}
 # not working yet ?
-fsvd <- funkSVD(x = rmat, k = 3, verbose = TRUE)
+# fsvd <- funkSVD(x = rmat, k = 3, verbose = TRUE)
+fsvd <- funkSVD(x = rmat, k = 4, gamma = 0.015, lambda = 0.001, min_improvement = 1e-06, min_epochs = 50, max_epochs = 200, verbose = FALSE)
+
 uv_preds <- predict(fsvd, rmat, verbose = TRUE)
 uv_preds
+```
+
+```{r}
+netflix <- read.csv('unscaled_data.csv')
+```
+```{r}
+netflix_small <- netflix[1:100, 2:51]
+
+# convert the jester data frame to a matrix
+netflix_small_rmat <- as.matrix(netflix_small)
+
+# convert matrix to a recommenderlab realRatingMatrix
+netflix_small_rmat <- as(netflix_small_rmat,"realRatingMatrix")
+```
+
+```{r}
+# convert the jester data frame to a matrix
+netflix_rmat <- as.matrix(netflix)
+
+# convert matrix to a recommenderlab realRatingMatrix
+netflix_rmat <- as(netflix_rmat,"realRatingMatrix")
+```
+
+```{r}
+#netflix_small_rmat@data
+#colSums(is.na(netflix_small))
+
+netflix_small[rowSums(is.na(netflix_small))==length(netflix_small),]
+```
+```{r}
+netflix_small_2 <- netflix_small[rowSums(is.na(netflix_small))<40,]
+
+# convert the jester data frame to a matrix
+netflix_small_rmat_2 <- as.matrix(netflix_small_2)
+
+# convert matrix to a recommenderlab realRatingMatrix
+netflix_small_rmat_2 <- as(netflix_small_rmat_2,"realRatingMatrix")
+```
+
+
+```{r}
+# split the data into the training and the test set:
+split_data <- evaluationScheme(netflix_small_rmat_2, method="split", train=0.8, k=1, given=10, goodRating=3)
+```
+
+
+```{r}
+# non-normalized
+netflix_reco <- Recommender(getData(split_data, "train"), "UBCF", 
+      param=list(normalize = NULL, method="Cosine"))
+```
+
+```{r}
+class(getData(split_data, "known"))
+```
+
+```{r}
+netflix_predictions <- predict(netflix_reco, getData(split_data, "known"), type="ratings")
+netflix_predictions@data
+```
+
+```{r}
+calcPredictionAccuracy(netflix_predictions, getData(split_data, "unknown"))
 ```
 
 :::
@@ -181,8 +284,14 @@ https://towardsdatascience.com/recommendation-systems-using-uv-decomposition-a1d
 
 https://rpubs.com/jt_rpubs/285729
 
+https://search.r-project.org/CRAN/refmans/recommenderlab/html/funkSVD.html
+
+https://www.rdocumentation.org/packages/recommenderlab/versions/1.0.2/topics/evaluationScheme
 
 
+https://github.com/cran/recommenderlab
+
+https://cran.r-project.org/web/packages/recommenderlab/recommenderlab.pdf
 
 
 
