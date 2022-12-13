@@ -90,24 +90,183 @@ This is the long tail phenomenon, where physical stores only sell the more popul
 
 ## Collaborative Filtering
 
-Recommendation systems can be implemented using different techniques, but for this tutorial we will be focusing on collaborative filtering. This technique focuses more on the similarity of users with each other instead of similarity of features between items. This follows the intuition that similar users will tend to prefer similar items and thus the recommendations are based off of this idea (Ullman).
+Recommendation systems can be implemented using different techniques, but for this tutorial we will be focusing on collaborative filtering. This technique focuses more on the similarity of users with each other instead of similarity of features between items. This follows the intuition that similar users will tend to prefer similar items and thus the recommendations are based off of this idea (Ullman). You can also think of this in terms of having *neighbors*, where neighbors are based on similar item preferences. A user will receive recommendations that are influenced by what their neighbors prefer (Gormley).
 
-Before implementing collaborative filtering recommendation systems, we will first discuss the mathematical theory that works in the background.
+Before implementing collaborative filtering recommendation systems, we will first discuss the mathematical theory that works in the background. Specifically, we will discuss how collaborative filtering can be done through *cosine similarity* or *matrix decomposition*
 
 # Mathematical Theory
 
+## Cosine Distance
+
+To measure the similarity of users from the utility matrix, we can use the Cosine Distance method, which calculates the angle between the ratings of different users. In this method, we treat the blank entries as zero. One thing to note about this method is that it latently treats the lack of a rating as disliking the movie (i.e. rating = 0) (Ullman).
+
+[ADD GENERALIZED FORMULA?]
+
+Using our example, we can check the similarity of some of your friends. To get the cosine angle between Hyun and Eric, we can use this equation:
+
+$\frac{(2\times5) + (4\times2) + (3\times5)}{\sqrt{5^2+3^2+2^2+1^2+4^2+3^2}\sqrt{4^2+5^2+2^2+5^2}} = 0.493$
+
+We can also check for the cosine angle between Hyun and Chunru:
+
+$\frac{(5\times3) + (2\times4) + (1\times5) + (3\times3)}{\sqrt{5^2+3^2+2^2+1^2+4^2+3^2}\sqrt{3^2+1^2+4^2+5^2+3^2}} = 0.597$
+
+Since a larger cosine value implies a smaller angle and therefore a smaller distance, this measure tells us that Hyun is closer to Chunru than to Eric.
+
+In addition, we can normalize ratings by subtracting the average rating of each user. In this case, the movies with low ratings would become negative and those with high ratings would be positive. Users with contrasting ratings on movies would have consine vectors in opposite direction, while users with similar ratings would have smaller distances between them (Ullman).
+
+In our example, the utility matrix after normalizing would be:
+
+|        | WM1 | WM2 | WM3 | WM4 | NM1 | NM2 | NM3 |
+|--------|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+| Hyun   | 2   |     | 0   | -1  | -2  | 1   | 0   |
+| Eric   |     | 0   |     | 1   |     | -2  | 1   |
+| Chunru | -0.2| -2.2|     | 0.8 | 1.8 |     | -0.2|
+| You    | 0.5 | -1.5| -0.5| 1.5 |     |     |     |
+
+Then the cosine of the angle between Hyun and Eric is:
+
+$\frac{(-1\times1) + (1\times-2)}{\sqrt{2^2+(-1^2)+(-2^2)+1^2}\sqrt{1^2+(-2^2)+1^2}} = -0.387$
+
+The cosine of the angle between Hyun and Chunru is:
+
+$\frac{(2\times-0.2) + (-1\times0.8) + (-2\times1.8)}{\sqrt{2^2+(-1^2)+(-2^2)+1^2}\sqrt{(-0.2^2)+(-2.2^2)+0.8^2+1.8^2+(-0.2^2)}} = -0.512$
+
+Still we can see that Hyun is closer to Chunru than to Eric.
+
+## UV (Matrix) Decomposition (Need to Paraphrase)
+
+[PARAPHRASE]
+An approach to estimating the blank entries in the utility matrix is to conjecture that the utility matrix is actually the product of two long, thin matrices. 
+
+For example, if we start with the utility matrix M, with n rows and m columns (i.e., here are 4 users and 7 movies, so martix M is $4 \times 7$), then we might be able to find a $n \times d$ matrix U and a $d \times m$ matrix V, such that the product matrxi UV closely approximates M in those entries where M is **nonblank**. After that, we can then use the entries in the product UV to estimate the corresponding **blank** entries in utility matrix M. This process is called UV-decomposition of M.
+[PARAPHRASE]
+
+In our example, we decompose the utility matrix M ($4 \times 7$), into two matrix U ($4 \times 2$) and V ($2 \times 7$)
+
+$$
+\begin{bmatrix}
+ 5   &  &  3   &  2   & 1   &  4   &  3  \\
+     &  4  &   &  5   & &  2   &  5  \\
+ 3   & 1   &   &  4   & 5  &   &  3   \\
+ 4   & 2   & 3   & 5   & & &    
+\end{bmatrix}
+ = 
+\begin{bmatrix}
+u_{11} & u_{12} \\
+u_{21} & u_{22} \\
+u_{31} & u_{32} \\
+u_{41} & u_{42} 
+\end{bmatrix}
+\times 
+\begin{bmatrix}
+v_{11} & v_{12} & v_{13} & v_{14} & v_{15} & v_{16} & v_{17} \\
+v_{21} & v_{22} & v_{23} & v_{24} & v_{25} & v_{26} & v_{27} 
+\end{bmatrix}
+$$
+Theoratically, we can find many candidates of matrix U and V, whose product UV is close to V. So we need a measurement to pick the one that is closest to M. The typical choice is called the **root-mean-square error (RMSE)**, where we sum over the square root of the difference of nonblank entries from the martix M and the corresponding entries from product matrix UV. 
+
+To find the UV-decomposition matrix with the least RMSE, we start with an arbitrary guess of matrix U and V, and the repeatedly adjusting one entry in U or V to make the RMSE smaller. Here we use our example to show the process of UV-decomposition.
+
+**Step 1 : Start with matrices U and V with all entries 1:**
+
+$$
+\begin{bmatrix}
+1 & 1 \\
+1 & 1 \\
+1 & 1 \\
+1 & 1  
+\end{bmatrix}
+\times 
+\begin{bmatrix}
+1 & 1 & 1 & 1 & 1 & 1 & 1 \\
+1 & 1 & 1 & 1 & 1 & 1 & 1 
+\end{bmatrix}
+=
+\begin{bmatrix}
+2 & 2 & 2 & 2 & 2 & 2 & 2 \\
+2 & 2 & 2 & 2 & 2 & 2 & 2 \\ 
+2 & 2 & 2 & 2 & 2 & 2 & 2 \\
+2 & 2 & 2 & 2 & 2 & 2 & 2 \\
+\end{bmatrix}
+$$
+
+**Step 2 : Alter u11 to reduce the RMSE as much as possible:**
+
+$$
+\begin{bmatrix}
+x & 1 \\
+1 & 1 \\
+1 & 1 \\
+1 & 1  
+\end{bmatrix}
+\times 
+\begin{bmatrix}
+1 & 1 & 1 & 1 & 1 & 1 & 1 \\
+1 & 1 & 1 & 1 & 1 & 1 & 1 
+\end{bmatrix}
+=
+\begin{bmatrix}
+x+1 & x+1  & x+1  & x+1  & x+1  & x+1  & x+1  \\
+2 & 2 & 2 & 2 & 2 & 2 & 2 \\ 
+2 & 2 & 2 & 2 & 2 & 2 & 2 \\
+2 & 2 & 2 & 2 & 2 & 2 & 2 \\ 
+\end{bmatrix}
+$$
+
+The contribution to the sum of squares from the first row is:
+
+$$
+(5-(x+1))^2 + (3-(x+1))^2 + (2-(x+1))^2 + (1-(x+1))^2 + (4-(x+1))^2 + (3-(x+1))^2 \\
+= (4-x)^2 + (2-x)^2 + (1-x)^2 + (-x)^2 + (3-x)^2 + (2-x)^2
+$$
+
+and we want a value of x that minimizes the sum, so we take the derivative and set that equal to 0, as:
+$$ -2((4-x)+ (2-x)+ (1-x)+ (-x) + (3-x) + (2-x)) = 0 $$
+from which we get x = 2. 
+
+Now update the U and V martix with the enrty that $u_{11}=2$.
+
+$$
+\begin{bmatrix}
+2 & 1 \\
+1 & 1 \\
+1 & 1 \\
+1 & 1  
+\end{bmatrix}
+\times 
+\begin{bmatrix}
+1 & 1 & 1 & 1 & 1 & 1 & 1 \\
+1 & 1 & 1 & 1 & 1 & 1 & 1 
+\end{bmatrix}
+=
+\begin{bmatrix}
+3 & 3 & 3 & 3 & 3 & 3 & 3 \\
+2 & 2 & 2 & 2 & 2 & 2 & 2 \\ 
+2 & 2 & 2 & 2 & 2 & 2 & 2 \\
+2 & 2 & 2 & 2 & 2 & 2 & 2 \\
+\end{bmatrix}
+$$
+
+**Step 3 : Alter $v_{11}$ to reduce the RMSE as much as possible and update $v_{11}$**
+
+**Step 4 : Iterate the steps above again and again until the RMSE.**
+
+[CHECK UV PART IF NEED TO PARAPHRASE]
+
+Now that we've discussed the math behind this, let's move on to some coding!
+
 # Coding Example (R)
 
+To apply the concepts we've learned so far, let us implement these concepts in R. R has a built-in library *recommenderlab*, which we will go to later. Before going that, let's first implement a basic cosine similarity solution manually in order to illustrate the point.
 ::: {.solution}
 ```{r packages, message=FALSE, warning=FALSE}
-library(R6030)     # functions for DS 6030
+#library(R6030)     # functions for DS 6030
 library(tidyverse) # functions for data manipulation   
-library(recommenderlab)
+library(recommenderlab) # function for remmondation systems
 ```
-:::
 
-::: {.solution}
-```{r packages, message=FALSE, warning=FALSE}
+We will continue to use the initial movie rating example. Let's figure out which movie you should watch out of the three new movies.
+```{r}
 movie_ratings <- data.frame(
   WM1 = c(5, NA, 3, 4), 
   WM2 = c(NA, 4, 1, 2),
@@ -120,160 +279,205 @@ movie_ratings <- data.frame(
 rownames(movie_ratings) <- c('Hyun', 'Eric', 'Chunru', 'You')
 movie_ratings
 ```
+
+We will need a function that computes cosine similarity as it was discussed earlier in this tutorial.
 ```{r}
+# The two vectors must have the same length
 cosine_similarity <- function(vec_1, vec_2) {
   vec_len <- length(vec_1)
   
+  # NA values are replaced with 0
   vec_1[is.na(vec_1)] <- 0
   vec_2[is.na(vec_2)] <- 0
   
+  # Computing the denominator
   vec_1_denom <- sqrt(sum(vec_1^2))
   vec_2_denom <- sqrt(sum(vec_2^2))
-  denom <- vec_1_denom * vec_2_denom
-  print(denom)
+  denominator <- vec_1_denom * vec_2_denom
   
+  # Computing the numerator
   tib = tibble(vec_1 = vec_1, vec_2 = vec_2)
   tib <- tib %>% mutate(products = vec_1 * vec_2)
-  print(tib)
   numerator <- sum(tib$products)
   
-  return (numerator / denom)
+  # Return the cosine similarity
+  return (numerator / denominator)
 }
 ```
 
+Let's check how similar your taste in movies are to the 3 friends who responded. Remember, the higher cosine similarity value means more similarity.
 ```{r}
-sqrt(5^2 + 3^2 + 2^2 + 1^2 + 4^2 + 3^2)
-```
-
-```{r}
-eric <- as.numeric(as.vector(movie_ratings['Eric',]))
+# Extract each person's ratings as vectors
+you <- as.numeric(as.vector(movie_ratings['You',]))
 hyun <- as.numeric(as.vector(movie_ratings['Hyun',]))
-cosine_similarity(eric, hyun)
-```
+eric <- as.numeric(as.vector(movie_ratings['Eric',]))
+chunru <- as.numeric(as.vector(movie_ratings['Chunru',]))
 
+
+# Compute distance using cosine similarity
+similarities <- data.frame(
+  cosine_similarity = c(cosine_similarity(you, hyun), cosine_similarity(you, eric), cosine_similarity(you, chunru))
+)
+rownames(similarities) <- c('Hyun', 'Eric', 'Chunru')
+similarities
+```
+Based on these results, we can see that your taste in movies is most similar to Hyun's. We will use these similarity scores as weights for predicting your movie ratings for the three new movies.
 
 ```{r}
-#min(movie_ratings[][], na.rm = TRUE)
-#max(movie_ratings[][], na.rm = TRUE)
-
-hist(as.vector(as.matrix(movie_ratings)), main = "Distribution of Movie Ratings",
-     col = "yellow", xlab = "Ratings")
+# Function for computing the weighted average
+movie_rating_weighted_average <- function(movie, friends) {
+  denominator <- 0
+  numerator <- 0
+  for (friend in friends) {
+    friend_similarity <- similarities[friend,][1]
+    friend_rating <- movie_ratings[friend, movie][1]
+    
+    # Weighted average will take into account users who actually rated the movie
+    if (is.na(friend_rating)) next
+    
+    denominator <- denominator + friend_similarity
+    numerator <- numerator + (friend_similarity * friend_rating)
+  }
+  
+  return (numerator / denominator)
+}
 ```
 ```{r}
-# convert the jester data frame to a matrix
+friend_names <- c('Hyun', 'Eric', 'Chunru')
+new_movies <- c('NM1', 'NM2', 'NM3')
+new_movie_predicted_ratings <- tibble()
+for (n in new_movies) {
+  predicted_rating <- movie_rating_weighted_average(n, friend_names)
+  prediction_tibble <- tibble(movie = n, predicted_rating = predicted_rating)
+  new_movie_predicted_ratings <- bind_rows(new_movie_predicted_ratings, prediction_tibble)
+}
+new_movie_predicted_ratings
+```
+Based on these predictions, it looks like you will probably like NM3 the most out of all the options.
+
+Now that we were able to get a feel of how collaborative filtering works through cosine similarity, we will now discuss how to make recommendations using the *recommenderlab* library.
+
+We will start by converting our dataframe to a *realRatingMatrix* object:
+```{r}
+# convert the movie ratings data frame to a matrix
 rmat <- as.matrix(movie_ratings)
 
 # convert matrix to a recommenderlab realRatingMatrix
-rmat <- as(rmat,"realRatingMatrix")
+rmat <- as(rmat, "realRatingMatrix")
 ```
 
-Cosine similarity
+We can then proceed to creating our *Recommender* options. The library contains the options we discussed earlier in this tutorial. 
+
+The type *UBCF* stands for *User-Based Collaborative Filtering* which we can use to apply cosine similarity and normalization. The implementation of *recommenderlabs* also makes use of a k-nearest neighbors algorithm when building this type of recommender.
+
+The type *SVDF* stands for *Funk Singular Value Decomposition* which implements the UV decomposition technique.
+
+We will create three versions:
+
+1. Recommender using Cosine Similarity
+2. Recommender using Cosine Similarity with Normalized values
+3. Recommender using UV decomposition
+
 ```{r}
-# non-normalized
+# Non-normalized cosine
 reco <- Recommender(rmat, "UBCF", 
       param=list(normalize = NULL, method="Cosine"))
 
-# uv
-reco_uv <- Recommender(rmat, "SVDF", 
-      param=list(k = 4, gamma = 0.015, lambda = 0.001, min_improvement = 1e-06, min_epochs = 50, max_epochs = 200))
-
-# centered
+# Normalized centered cosine
 reco_centered <- Recommender(rmat, "UBCF", 
-      param=list(normalize = "center",method="Cosine"))
+      param=list(normalize = "center", method="Cosine"))
 
-# Z-score normalization
-reco_z_score <- Recommender(rmat, "UBCF", 
-      param=list(normalize = "Z-score",method="Cosine"))
+# UV decomposition
+# The parameter k is the missing dimension for the decomposed matrices. 
+# For this library, it cannot be greater than the number of users or the number of items
+reco_uv <- Recommender(rmat, "SVDF", 
+      param=list(k = 4))
 ```
 
+Now we can check the results:
 ```{r}
 predictions <- predict(reco, rmat, type="ratings")
+print('Non-normalized Cosine Similarity')
 predictions@data
 
-predictions_uv <- predict(reco_uv, rmat, type="ratings")
-predictions_uv@data
-
 predictions_centered <- predict(reco_centered, rmat, type="ratings")
+print('Normalized Cosine Similarity')
 predictions_centered@data
 
-predictions_z_score <- predict(reco_z_score, rmat, type="ratings")
-predictions_z_score@data
+predictions_uv <- predict(reco_uv, rmat, type="ratings")
+print('UV Decomposition')
+predictions_uv@data
 ```
+As we can see from the results, NM3 has the highest predicted rating for 2 out of the 3 models. This just shows how recommender systems can be built using different distance measures and algorithms and may produce varying results.
 
-UV decomposition
-```{r}
-# not working yet ?
-# fsvd <- funkSVD(x = rmat, k = 3, verbose = TRUE)
-fsvd <- funkSVD(x = rmat, k = 4, gamma = 0.015, lambda = 0.001, min_improvement = 1e-06, min_epochs = 50, max_epochs = 200, verbose = FALSE)
-
-uv_preds <- predict(fsvd, rmat, verbose = TRUE)
-uv_preds
-```
+The *recommenderlab* library also provides ways to measure models against each other. To show this, we will need a bigger dataset. We will use a larger dataset of movie ratings from Netflix.
 
 ```{r}
 netflix <- read.csv('unscaled_data.csv')
+head(netflix)
 ```
+
+We will then follow similar steps as earlier, by converting the dataframe into a matrix.
 ```{r}
+# For this example, we will use a smaller set of observations and remove the customer id column
 netflix_small <- netflix[1:100, 2:51]
 
-# convert the jester data frame to a matrix
-netflix_small_rmat <- as.matrix(netflix_small)
+# Filter to users who have made atleast 10 movie ratings
+netflix_small <- netflix_small[rowSums(is.na(netflix_small))<40,]
+
+# convert the netflix data frame to a matrix
+netflix_rmat <- as.matrix(netflix_small)
 
 # convert matrix to a recommenderlab realRatingMatrix
-netflix_small_rmat <- as(netflix_small_rmat,"realRatingMatrix")
+netflix_rmat <- as(netflix_rmat, "realRatingMatrix")
 ```
 
-```{r}
-# convert the jester data frame to a matrix
-netflix_rmat <- as.matrix(netflix)
-
-# convert matrix to a recommenderlab realRatingMatrix
-netflix_rmat <- as(netflix_rmat,"realRatingMatrix")
-```
-
-```{r}
-#netflix_small_rmat@data
-#colSums(is.na(netflix_small))
-
-netflix_small[rowSums(is.na(netflix_small))==length(netflix_small),]
-```
-```{r}
-netflix_small_2 <- netflix_small[rowSums(is.na(netflix_small))<40,]
-
-# convert the jester data frame to a matrix
-netflix_small_rmat_2 <- as.matrix(netflix_small_2)
-
-# convert matrix to a recommenderlab realRatingMatrix
-netflix_small_rmat_2 <- as(netflix_small_rmat_2,"realRatingMatrix")
-```
-
-
+We can then split the data using the *evaluationScheme* function. We can also set a *goodRating* value. Since the ratings are on a scale of 1-5, we will use 3 for this example.
 ```{r}
 # split the data into the training and the test set:
-split_data <- evaluationScheme(netflix_small_rmat_2, method="split", train=0.8, k=1, given=10, goodRating=3)
+split_data <- evaluationScheme(
+  netflix_rmat, 
+  method="split", 
+  train=0.8, 
+  k=1, 
+  given=10, 
+  goodRating=3
+)
 ```
 
-
+We can then build our models using the training data:
 ```{r}
-# non-normalized
+# Non-normalized cosine
 netflix_reco <- Recommender(getData(split_data, "train"), "UBCF", 
       param=list(normalize = NULL, method="Cosine"))
+
+# Normalized centered cosine
+netflix_reco_centered <- Recommender(getData(split_data, "train"), "UBCF", 
+      param=list(normalize = "center", method="Cosine"))
+
+# UV decomposition
+netflix_reco_uv <- Recommender(getData(split_data, "train"), "SVDF", 
+      param=list(k = 4))
 ```
 
-```{r}
-class(getData(split_data, "known"))
-```
-
+The *calcPredictioAccuracy* function calculates the error metrics for the models.
 ```{r}
 netflix_predictions <- predict(netflix_reco, getData(split_data, "known"), type="ratings")
-netflix_predictions@data
+netflix_predictions_centered <- predict(netflix_reco_centered, getData(split_data, "known"), type="ratings")
+netflix_predictions_uv <- predict(netflix_reco_uv, getData(split_data, "known"), type="ratings")
+
+error_results <- rbind(
+  cosine = calcPredictionAccuracy(netflix_predictions, getData(split_data, "unknown")),
+  cosine_normalized = calcPredictionAccuracy(netflix_predictions_centered, getData(split_data, "unknown")),
+  uv = calcPredictionAccuracy(netflix_predictions_uv, getData(split_data, "unknown"))
+)
+error_results
 ```
 
-```{r}
-calcPredictionAccuracy(netflix_predictions, getData(split_data, "unknown"))
-```
+From these results, we can see that the Cosine Normalized model produced the lowest RMSE and MSE values for the Netflix data.
 
 :::
+
 # Coding Example (Python)
 
 # References
@@ -294,6 +498,6 @@ https://github.com/cran/recommenderlab
 https://cran.r-project.org/web/packages/recommenderlab/recommenderlab.pdf
 
 
-
+https://www.cs.cmu.edu/~mgormley/courses/10601-s17/slides/lecture25-mf.pdf
 
 
