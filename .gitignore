@@ -9,7 +9,6 @@
 *.ipynb_checkpoints
 */.ipynb_checkpoints/*
 *.pyc
-*.csv 
 *.txt
 *.pdf
 *.rds

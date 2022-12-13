@@ -53,7 +53,7 @@ This tutorial will go through the concept of Recommendation Systems, specificall
 
 # Background of Concepts
 
-Before jumping into the math, it is important to go through some examples of recommendation systems as well as the concepts of the *Utility Matrix* and the *Long Tail*.
+Before jumping into the math, it is important to go through some examples of recommendation systems as well as the concept of the *Utility Matrix*.
 
 ## Recommendation Systems
 
@@ -61,9 +61,9 @@ We mentioned earlier that recommendation systems are being applied in different 
 
 1. Movie Recommendations - Like the initial example, recommending movies is one of the most popular examples for recommendation systems. Streaming services such as Netflix, Hulu, Disney, and others all provide recommendations for their users to try. 
 2. Product Recommendations - Online shopping is another one of the avenues where recommendation systems are very useful. Users receive suggestions on products to buy based on what similar users are buying.
-3. News Articles - Another example of recommendation systems are with news articles where readers will receive suggestions on articles that they may find interesting.
+3. Song Recommendations - Another example of recommendation systems are with music streaming services where users recveive suggestions for songs that they can add to their playlists.
 
-There are definitely are more examples but these should be able to provide an idea of the vastness of use cases where recommendation systems can be applied. Alternatively, recommendation systems
+There are definitely are more examples but these should be able to provide an idea of the vastness of use cases where recommendation systems can be applied. Recommendation systems are helpful in recommending a wider range of items to its users where a physical store would not be able to.
 
 ## The Utility Matrix
 
@@ -76,17 +76,9 @@ Recall the table we created earlier for the initial example where the different 
 | Chunru | 3   | 1   |     | 4   | 5   |     | 3   |
 | You    | 4   | 2   | 3   | 5   |     |     |     |
 
-Typically, recommendation systems have two types of entities: *users* and *entities*. The utility matrix represents the degree of preference that a user has for certain items. In our example, the degree of preference is measured on a movie rating scale of 1 to 5. It is also important to note that it is assumed that the utility matrix is sparse, meaning there are blank values in the matrix. This is good to replicate the real-world scenario where not all users would have a degree of preference for all of the items.
+Typically, recommendation systems have two types of entities: *users* and *items*. The utility matrix represents the degree of preference that a user has for certain items. In our example, the degree of preference is measured on a movie rating scale of 1 to 5. It is also important to note that it is assumed that the utility matrix is sparse, meaning there are blank values in the matrix. This is good for replicating the real-world scenario where not all users would have a rating for all of the items.
 
-The goal of recommendation systems is to fill out the utility matrix by predicting values for the blank ones. Alternatively, recommendation systems can also predict the values for some entries in each row which are expected to have higher values. This would make it so that the recommendation system does not have to fill out all of the empty cells but just a large subset of cells (Ullman).
-
-## The Long Tail
-
-After learning a little bit about the concept of recommendation systems, it is also important to understand why these systems are necessary in technology nowadays. To picture this, we can look at a physical example. Keeping within the movie example, let's say we have a store that sells physical copies of movies. These stores tend to only sell the more popular movies. Online stores, on the other hand, would have more movies at their disposal. Recommendation systems help to recommend these less popular movies to users so that they can also be sold.
-
-This is the long tail phenomenon, where physical stores only sell the more popular products. Recommendation systems help to present a wider range of options (Ullman).
-
-![alt text](Long_Tail.png "The Long Tail")
+The goal of recommendation systems is to fill out the utility matrix by predicting values for the blank ones. Alternatively, recommendation systems can also predict the values for some entries in each row which are expected to have higher values. This would make it so that the recommendation system does not have to fill out all of the empty cells but just a large subset of cells. Applying techniques such as clustering to the original matrix is also something that be considered so that less values need to be predicted (Ullman).
 
 ## Collaborative Filtering
 
@@ -258,6 +250,7 @@ Now that we've discussed the math behind this, let's move on to some coding!
 # Coding Example (R)
 
 To apply the concepts we've learned so far, let us implement these concepts in R. R has a built-in library *recommenderlab*, which we will go to later. Before going that, let's first implement a basic cosine similarity solution manually in order to illustrate the point.
+
 ::: {.solution}
 ```{r packages, message=FALSE, warning=FALSE}
 #library(R6030)     # functions for DS 6030
@@ -355,7 +348,7 @@ new_movie_predicted_ratings
 ```
 Based on these predictions, it looks like you will probably like NM3 the most out of all the options.
 
-Now that we were able to get a feel of how collaborative filtering works through cosine similarity, we will now discuss how to make recommendations using the *recommenderlab* library.
+Now that we were able to get a feel of how collaborative filtering works through cosine similarity, we will now discuss how to make recommendations using the *recommenderlab* library as Topor explains in his [article](https://rpubs.com/jt_rpubs/285729).
 
 We will start by converting our dataframe to a *realRatingMatrix* object:
 ```{r}
@@ -366,9 +359,9 @@ rmat <- as.matrix(movie_ratings)
 rmat <- as(rmat, "realRatingMatrix")
 ```
 
-We can then proceed to creating our *Recommender* options. The library contains the options we discussed earlier in this tutorial. 
+We can then proceed to creating our *Recommender* models. The library contains the options we discussed earlier in this tutorial. Hahsler discusses this in the package [documentation](https://cran.r-project.org/web/packages/recommenderlab/).
 
-The type *UBCF* stands for *User-Based Collaborative Filtering* which we can use to apply cosine similarity and normalization. The implementation of *recommenderlabs* also makes use of a k-nearest neighbors algorithm when building this type of recommender.
+The type *UBCF* stands for *User-Based Collaborative Filtering* which we can use to apply cosine similarity and normalization. The implementation of *recommenderlab* also makes use of a k-nearest neighbors algorithm when building this type of recommender as seen in the package [source code](https://github.com/cran/recommenderlab).
 
 The type *SVDF* stands for *Funk Singular Value Decomposition* which implements the UV decomposition technique.
 
@@ -410,17 +403,17 @@ predictions_uv@data
 ```
 As we can see from the results, NM3 has the highest predicted rating for 2 out of the 3 models. This just shows how recommender systems can be built using different distance measures and algorithms and may produce varying results.
 
-The *recommenderlab* library also provides ways to measure models against each other. To show this, we will need a bigger dataset. We will use a larger dataset of movie ratings from Netflix.
+The *recommenderlab* library also provides ways to measure models against each other. To show this, we will need a bigger dataset. We will use a larger dataset of movie ratings from [Netflix](https://www.kaggle.com/datasets/netflix-inc/netflix-prize-data). We did some pre-processing on the data to construct it into a utility matrix format. To check that function, you can check [here]() and you can download the csv file [here]().
 
 ```{r}
-netflix <- read.csv('unscaled_data.csv')
+netflix <- read.csv('unscaled_title_data.csv')
 head(netflix)
 ```
 
 We will then follow similar steps as earlier, by converting the dataframe into a matrix.
 ```{r}
-# For this example, we will use a smaller set of observations and remove the customer id column
-netflix_small <- netflix[1:100, 2:51]
+# For this example, we will remove the customer id column
+netflix_small <- netflix[, 2:51]
 
 # Filter to users who have made atleast 10 movie ratings
 netflix_small <- netflix_small[rowSums(is.na(netflix_small))<40,]
@@ -460,7 +453,7 @@ netflix_reco_uv <- Recommender(getData(split_data, "train"), "SVDF",
       param=list(k = 4))
 ```
 
-The *calcPredictioAccuracy* function calculates the error metrics for the models.
+The *calcPredictioAccuracy* function calculates the Root Mean Square Error (RMSE), Mean Squared Error (MSE), and Mean Absolute Error (MAE)s for each of the models. This follows an approach suggested in the *recommenderlab* package, where we first use the known portion of the test set to make predictions and then calculate the error between those predictions and the test data's unknown portion ([Topor](https://rpubs.com/jt_rpubs/285729)).
 ```{r}
 netflix_predictions <- predict(netflix_reco, getData(split_data, "known"), type="ratings")
 netflix_predictions_centered <- predict(netflix_reco_centered, getData(split_data, "known"), type="ratings")
@@ -476,168 +469,191 @@ error_results
 
 From these results, we can see that the Cosine Normalized model produced the lowest RMSE and MSE values for the Netflix data.
 
+We discussed a few ways to create and test recommendation models in this section, but there are many more for you to explore. If you want to explore other methods, Topor discusses a lot of interesting variations in his [article](https://rpubs.com/jt_rpubs/285729). The *recommenderlab* [documentation](https://cran.r-project.org/web/packages/recommenderlab/) and [code repository](https://github.com/cran/recommenderlab) is also very detailed. 
+
 :::
+
+In addition, we will discuss a simple example coded in Python as well to show the steps for a bigger example.
 
 # Coding Example (Python)
 
-::: {.solution}
+We will be using the same Netflix [data](https://www.kaggle.com/datasets/netflix-inc/netflix-prize-data) we used earlier. The full notebook for this example can be found [here]().
+
 ```{r}
 library(reticulate)
-use_python("/Users/erictria/opt/anaconda3/bin/python")
+knitr::opts_chunk$set(python.reticulate=FALSE)
+#use_python("/Users/erictria/opt/anaconda3/bin/python")
 ```
 
-```{python}
+For this Python example, we will be using the *cosine_similarity* function from the *sklearn* library. 
+
+::: {.solution}
+
+First, we have to implement the necessary libraries for this example:
+```{python, eval=FALSE}
 import numpy as np
 import pandas as pd
-import time
-from sklearn.preprocessing import StandardScaler
+import seaborn as sns
+import matplotlib.pyplot as plt
 from sklearn.metrics.pairwise import cosine_similarity
 ```
 
-Read in data:
-```{python}
-py_netflix_data = pd.read_csv('unscaled_data.csv')
-py_netflix_data.head()
+We will start by reading in the data as before:
+```{python, eval=FALSE}
+rating_df = pd.read_csv('unscaled_title_data.csv')
+rating_df.head()
 ```
-```{python}
+
+```
 customer_ids = py_netflix_data['Cust_Id'].iloc[0:100]
 rating_df = py_netflix_data.iloc[0:100,1:51]
 rating_df.head()
 ```
 
-```{python}
-scaler = StandardScaler()
-scaler.fit(rating_df)
-scaled_df = pd.DataFrame(scaler.transform(rating_df))
-scaled_df.index = rating_df.index
-scaled_df.columns = rating_df.columns
-scaled_df = round(scaled_df, 3)
-scaled_df.head()
-```
-```{python}
-# Example in the paper
-a = np.array([[2/3, 0, 0, 5/3, -7/3, 0, 0]])
-b = np.array([[0, 0, 0, -5/3, 1/3, 4/3, 0]])
-cosine_similarity(a, b)
-```
-```{python}
-# sklearn.cosine_similiarity doesn't allow NA values
-# Imputing NA with 0 does not affect the value for cosine similiarity.
-scaled_df = scaled_df.fillna(0)
-scaled_df = pd.DataFrame(scaled_df.to_records())
-scaled_df
-```
-```{python}
-# Add back in customer_ids
-scaled_df.insert(loc=0, column='cust_id', value=customer_ids)
+We will then normalize the ratings using the technique we discussed earlier, by subtracting each user rating with the average rating of that user.
+
+```{python, eval=FALSE}
+scaled_df = rating_df.copy().iloc[:,1:]
+
+for i in range(len(rating_df)):
+  scaled_df.iloc[i,:] = (scaled_df.iloc[i,:] - scaled_df.mean(axis=1).values[i]) 
+
+scaled_df = scaled_df.fillna(0) # fillna(0) should come after scaling
+scaled_df["Cust_ID"] = rating_df["Cust_ID"]
+scaled_df = pd.concat([pd.DataFrame({"Cust_Id": scaled_df["Cust_ID"]}), scaled_df.iloc[:,1:]], axis = 1)
 scaled_df.head()
 ```
 
-```{python}
-# Finding the most similar user with the first user in our dataframe, customer ID #6
-# Extract an array using the movie ratings of that user
-
-rating_user6 = np.array([scaled_df.iloc[0, 2:]])
-max_similarity = 0
-similar_user = 0
-for i in range(len(scaled_df)):
-    if i == 0:
-      continue
-    target_user = np.array([scaled_df.iloc[i, 2:]])
-    curr_similarity = cosine_similarity(rating_user6, target_user)[0][0]
-    if max_similarity < curr_similarity:
-      max_similarity = curr_similarity
-      similar_user = i 
+Now we will create functions for finding similarities for users:
+```{python, eval=FALSE}
+def indices(lst, item):
+  return [i for i, x in enumerate(lst) if x == item]
 ```
-```{python}
-print("Similar User:", scaled_df['cust_id'].iloc[similar_user])
-print("Similarity Score:", max_similarity)
-```
-```{python}
-similar_df = scaled_df.iloc[[0,similar_user]]
-similar_df
-```
-
-Recommending movies for users:
-```{python}
-def samp(x):
-    print(x)
-```
-
-```{python}
-def get_similarities(idx):
-    current_rating = np.array([scaled_df.iloc[idx, 2:]]) # rating of the current user
-  
-    print('current rating', current rating)
-    # Get similarity with all the other users
-    similarity_list = []
-  
-    for i in range(len(scaled_df)):
-        if i == idx:
-            continue
-
-        another_rating = np.array([scaled_df.iloc[i, 2:]]) # rating of another 
-        curr_similarity = round(cosine_similarity(current_rating, another_rating)[0][0], 3)
-        similarity = {
-            'user_idx': i,
-            'cosine_similarity': curr_similarity
-        }
-        similarity_list.append(similarity)
-    
-    return similarity_list
-```
-```{python}
-print(get_similarities(0))
-```
-
-```{python}
-def recommend_movies(idx):
-  recommended_movies = pd.DataFrame()
-  current_rating = np.array([scaled_df.iloc[idx, 2:]]) # rating of the current user
-
-  if 0 not in current_rating:
-    print("This user has watched all the movies.")
-    return recommended_movies
-
-  # Get similarity with all the other users
-  similarity_list = get_similarities(idx)
-
-  # Get weighted average for the movies
-  movies = scaled_df[, 2:].columns
-  movie_predicted_ratings = []
-  for movie in movies:
-    current_user_rating = scaled_df[movie].iloc[idx]
-    if current_user_rating != 0:
-      continue
-
-    numerator = 0
-    denominator = 0
-    for similarity in similarities:
-      other_idx = similarity['user_idx']
-      other_similarity = similarity['cosine_similarity']
-      other_user_rating = scaled_df[movie].iloc[other_idx]
-
-      # Weighted average will take into account users who actually rated the movie
-      if other_user_rating == 0:
+```{python, eval=FALSE}
+def return_similarity(current_rating, idx):
+  similarity_list = []
+  for i in range(len(scaled_df)):
+      if i == idx:
         continue
+      another_rating = np.array([scaled_df.iloc[i,1:]]) # rating of another 
+      curr_similarity = round(cosine_similarity(current_rating, another_rating)[0][0], 3)
+      similarity_list.append(curr_similarity)
 
-      numerator += other_user_rating * other_similarity
-      denominator += other_similarity
+  current_id = scaled_df.iloc[[idx]]["Cust_Id"].values[0]
+  max_similarity = max(similarity_list)
+  max_idx = similarity_list.index(max_similarity)
+  target_id = scaled_df.iloc[[max_idx]]["Cust_Id"].values[0]
 
-    if denominator == 0:
-      continue
-    else:
-      predicted_rating = numerator / denominator
-      movie_predicted_ratings.append({
-        'movie': movie,
-        'predicted_rating': predicted_rating
-      })
-
-  recommended_movies = pd.DataFrame(movie_predicted_ratings).sort_values(by=['predicted_rating'], ascending=False)
-  return recommended_movies
+  return similarity_list
 ```
-```{python}
-print(recommend_movies(0))
+
+We also have a function for displaying our results later on:
+```{python, eval=FALSE}
+def plot_rating(expected_dict, idx):
+  title = expected_dict.keys()
+  rating = expected_dict.values() + averages[]
+  recommended = []
+  for score in rating:
+    if score > 0:
+      recommended.append(True)
+    else:
+      recommended.append(False)
+  df = pd.DataFrame({"Title" : title, "Expected Rating": rating, "Recommended" : recommended}).sort_values(by = "Expected Rating", ascending = False)
+  plt.figure(figsize=(20, 7))
+  plt.xticks(rotation=90)
+  plt.title("Predicted Rating for Unwatched Movies and Recommendation")
+  return (sns.barplot(x = "Title", y = "Expected Rating", hue = "Recommended", data = df), df.iloc[:10,:])
+```
+
+
+This is the main function. We will use weighted averages to recommend movies for a user.
+```{python, eval=FALSE}
+def get_similarity(idx):
+  current_rating = np.array([scaled_df.iloc[idx,1:]]) # rating of the current user
+
+  if 0 not in current_rating: # BASE CASE: if the user has watched all movies, then returns nothing.
+    print("This user has watched all the movies.")
+    return -1
+
+  similarity_list = return_similarity(current_rating, idx)
+
+  idx_count = 0
+  ratings = current_rating[0].tolist()
+  expected_dict = dict()
+  for rating in ratings: 
+    if rating != 0: # skip if the user has already seen a movie
+      continue
+    count = 0
+    movie_idx = indices(ratings, rating)[idx_count] #ratings.index(rating)
+    numerator = 0
+    denominator = sum(similarity_list) # denominator is just adding up all similarity scores
+    
+    # print("Predicting movie:", raw_titles[movie_idx])
+    idx_count += 1
+
+    for j in range(len(scaled_df)):
+      if j == idx: # don't add up my own rating
+        continue
+      other_rating = round(scaled_df.iloc[j,movie_idx+1],3)
+      # numerator is iteratively adding up each rating x each similarity score
+      numerator = numerator + (other_rating * similarity_list[count])
+      count += 1
+
+    if denominator == 0: # avoid zero division error
+      expected_rating = 0
+    else:
+      expected_rating = round(numerator / denominator, 2)
+
+    expected_dict[raw_titles[movie_idx]] = expected_rating
+
+  return plot_rating(expected_dict, idx)
+```
+
+Let's put these functions to work and make recommendations for some users!
+
+```{python, eval=FALSE}
+# user at index 1
+user_1_recos = get_similarity(1)
+```
+```{python, eval=FALSE}
+# top movies recommended for user at index 1
+user_1_recos[1]
+```
+
+```{python, eval=FALSE}
+# user at index 2
+user_2_recos = get_similarity(2)
+```
+```{python, eval=FALSE}
+# top movies recommended for user at index 2
+user_2_recos[1]
+```
+
+```{python, eval=FALSE}
+# user at index 175
+user_175_recos = get_similarity(175)
+```
+```{python, eval=FALSE}
+# top movies recommended for user at index 175
+user_175_recos[1]
+```
+
+```{python, eval=FALSE}
+# user at index 440
+user_440_recos = get_similarity(440)
+```
+```{python, eval=FALSE}
+# top movies recommended for user at index 440
+user_440_recos[1]
+```
+
+```{python, eval=FALSE}
+# user at index 999
+user_999_recos = get_similarity(999)
+```
+```{python, eval=FALSE}
+# top movies recommended for user at index 999
+user_999_recos[1]
 ```
 
 
@@ -645,22 +661,18 @@ print(recommend_movies(0))
 
 # References
 
+Gormley, M., (2017, April 19). Lecture: Matrix Factorization and Collaborative Filtering. Machine Learning Department, Carnegie Mellon University. Retrieved December 13, 2022, from https://www.cs.cmu.edu/~mgormley/courses/10601-s17/slides/lecture25-mf.pdf
+
+Hahsler, M., (2022, August 17). recommenderlab: Lab for Developing and Testing Recommender Algorithms. Cran. Retrieved December 13, 2022, from https://cran.r-project.org/web/packages/recommenderlab/
+
+Hahsler, M., (2022, August 17). R package recommenderlab - Lab for Developing and Testing Recommender Algorithms. Github. Retrieved December 13, 2022, from https://github.com/cran/recommenderlab
+
+Netflix, (2019, November 13). Netflix Prize data. Kaggle. Retrieved December 7, 2022, from https://www.kaggle.com/datasets/netflix-inc/netflix-prize-data
+
+Shummon Maas, L., (2019, June 11). Recommendation Systems using UV-Decomposition. Towards Data Science. Retrieved December 13, 2022, from https://towardsdatascience.com/recommendation-systems-using-uv-decomposition-a1d4116be4a1
+
+Topor, J., (2017, June 11). User-Based and Item-Based Collaborative Filtering. RPubs. Retrieved December 13, 2022, from https://rpubs.com/jt_rpubs/285729
+
 Ullman, J., Leskovec, J., Rajaraman, A., (2012, July 4). Mining Massive Datasets. Cambridge University Press. Retrieved December 7, 2022, from http://infolab.stanford.edu/~ullman/mmds/book.pdf 
-
-https://towardsdatascience.com/recommendation-systems-using-uv-decomposition-a1d4116be4a1
-
-https://rpubs.com/jt_rpubs/285729
-
-https://search.r-project.org/CRAN/refmans/recommenderlab/html/funkSVD.html
-
-https://www.rdocumentation.org/packages/recommenderlab/versions/1.0.2/topics/evaluationScheme
-
-
-https://github.com/cran/recommenderlab
-
-https://cran.r-project.org/web/packages/recommenderlab/recommenderlab.pdf
-
-
-https://www.cs.cmu.edu/~mgormley/courses/10601-s17/slides/lecture25-mf.pdf
 
 
