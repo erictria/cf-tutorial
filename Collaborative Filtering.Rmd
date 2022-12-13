@@ -480,6 +480,169 @@ From these results, we can see that the Cosine Normalized model produced the low
 
 # Coding Example (Python)
 
+::: {.solution}
+```{r}
+library(reticulate)
+use_python("/Users/erictria/opt/anaconda3/bin/python")
+```
+
+```{python}
+import numpy as np
+import pandas as pd
+import time
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics.pairwise import cosine_similarity
+```
+
+Read in data:
+```{python}
+py_netflix_data = pd.read_csv('unscaled_data.csv')
+py_netflix_data.head()
+```
+```{python}
+customer_ids = py_netflix_data['Cust_Id'].iloc[0:100]
+rating_df = py_netflix_data.iloc[0:100,1:51]
+rating_df.head()
+```
+
+```{python}
+scaler = StandardScaler()
+scaler.fit(rating_df)
+scaled_df = pd.DataFrame(scaler.transform(rating_df))
+scaled_df.index = rating_df.index
+scaled_df.columns = rating_df.columns
+scaled_df = round(scaled_df, 3)
+scaled_df.head()
+```
+```{python}
+# Example in the paper
+a = np.array([[2/3, 0, 0, 5/3, -7/3, 0, 0]])
+b = np.array([[0, 0, 0, -5/3, 1/3, 4/3, 0]])
+cosine_similarity(a, b)
+```
+```{python}
+# sklearn.cosine_similiarity doesn't allow NA values
+# Imputing NA with 0 does not affect the value for cosine similiarity.
+scaled_df = scaled_df.fillna(0)
+scaled_df = pd.DataFrame(scaled_df.to_records())
+scaled_df
+```
+```{python}
+# Add back in customer_ids
+scaled_df.insert(loc=0, column='cust_id', value=customer_ids)
+scaled_df.head()
+```
+
+```{python}
+# Finding the most similar user with the first user in our dataframe, customer ID #6
+# Extract an array using the movie ratings of that user
+
+rating_user6 = np.array([scaled_df.iloc[0, 2:]])
+max_similarity = 0
+similar_user = 0
+for i in range(len(scaled_df)):
+    if i == 0:
+      continue
+    target_user = np.array([scaled_df.iloc[i, 2:]])
+    curr_similarity = cosine_similarity(rating_user6, target_user)[0][0]
+    if max_similarity < curr_similarity:
+      max_similarity = curr_similarity
+      similar_user = i 
+```
+```{python}
+print("Similar User:", scaled_df['cust_id'].iloc[similar_user])
+print("Similarity Score:", max_similarity)
+```
+```{python}
+similar_df = scaled_df.iloc[[0,similar_user]]
+similar_df
+```
+
+Recommending movies for users:
+```{python}
+def samp(x):
+    print(x)
+```
+
+```{python}
+def get_similarities(idx):
+    current_rating = np.array([scaled_df.iloc[idx, 2:]]) # rating of the current user
+  
+    print('current rating', current rating)
+    # Get similarity with all the other users
+    similarity_list = []
+  
+    for i in range(len(scaled_df)):
+        if i == idx:
+            continue
+
+        another_rating = np.array([scaled_df.iloc[i, 2:]]) # rating of another 
+        curr_similarity = round(cosine_similarity(current_rating, another_rating)[0][0], 3)
+        similarity = {
+            'user_idx': i,
+            'cosine_similarity': curr_similarity
+        }
+        similarity_list.append(similarity)
+    
+    return similarity_list
+```
+```{python}
+print(get_similarities(0))
+```
+
+```{python}
+def recommend_movies(idx):
+  recommended_movies = pd.DataFrame()
+  current_rating = np.array([scaled_df.iloc[idx, 2:]]) # rating of the current user
+
+  if 0 not in current_rating:
+    print("This user has watched all the movies.")
+    return recommended_movies
+
+  # Get similarity with all the other users
+  similarity_list = get_similarities(idx)
+
+  # Get weighted average for the movies
+  movies = scaled_df[, 2:].columns
+  movie_predicted_ratings = []
+  for movie in movies:
+    current_user_rating = scaled_df[movie].iloc[idx]
+    if current_user_rating != 0:
+      continue
+
+    numerator = 0
+    denominator = 0
+    for similarity in similarities:
+      other_idx = similarity['user_idx']
+      other_similarity = similarity['cosine_similarity']
+      other_user_rating = scaled_df[movie].iloc[other_idx]
+
+      # Weighted average will take into account users who actually rated the movie
+      if other_user_rating == 0:
+        continue
+
+      numerator += other_user_rating * other_similarity
+      denominator += other_similarity
+
+    if denominator == 0:
+      continue
+    else:
+      predicted_rating = numerator / denominator
+      movie_predicted_ratings.append({
+        'movie': movie,
+        'predicted_rating': predicted_rating
+      })
+
+  recommended_movies = pd.DataFrame(movie_predicted_ratings).sort_values(by=['predicted_rating'], ascending=False)
+  return recommended_movies
+```
+```{python}
+print(recommend_movies(0))
+```
+
+
+:::
+
 # References
 
 Ullman, J., Leskovec, J., Rajaraman, A., (2012, July 4). Mining Massive Datasets. Cambridge University Press. Retrieved December 7, 2022, from http://infolab.stanford.edu/~ullman/mmds/book.pdf 
