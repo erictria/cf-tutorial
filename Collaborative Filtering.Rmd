@@ -403,7 +403,7 @@ predictions_uv@data
 ```
 As we can see from the results, NM3 has the highest predicted rating for 2 out of the 3 models. This just shows how recommender systems can be built using different distance measures and algorithms and may produce varying results.
 
-The *recommenderlab* library also provides ways to measure models against each other. To show this, we will need a bigger dataset. We will use a larger dataset of movie ratings from [Netflix](https://www.kaggle.com/datasets/netflix-inc/netflix-prize-data). We did some pre-processing on the data to construct it into a utility matrix format. To check that function, you can check [here]() and you can download the csv file [here]().
+The *recommenderlab* library also provides ways to measure models against each other. To show this, we will need a bigger dataset. We will use a larger dataset of movie ratings from [Netflix](https://www.kaggle.com/datasets/netflix-inc/netflix-prize-data). We did some pre-processing on the data to construct it into a utility matrix format. To check that function, you can check [here](https://github.com/erictria/cf-tutorial/blob/main/Netflix.ipynb) and you can also download the csv file [here](https://github.com/erictria/cf-tutorial/blob/main/unscaled_title_data.csv).
 
 ```{r}
 netflix <- read.csv('unscaled_title_data.csv')
@@ -477,7 +477,7 @@ In addition, we will discuss a simple example coded in Python as well to show th
 
 # Coding Example (Python)
 
-We will be using the same Netflix [data](https://www.kaggle.com/datasets/netflix-inc/netflix-prize-data) we used earlier. The full notebook for this example can be found [here]().
+We will be using the same Netflix [data](https://www.kaggle.com/datasets/netflix-inc/netflix-prize-data) we used earlier. The full notebook for this example can be found [here](https://github.com/erictria/cf-tutorial/blob/main/Netflix.ipynb).
 
 ```{r}
 library(reticulate)
@@ -490,7 +490,7 @@ For this Python example, we will be using the *cosine_similarity* function from 
 ::: {.solution}
 
 First, we have to implement the necessary libraries for this example:
-```{python, eval=FALSE}
+```{python}
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -498,38 +498,32 @@ import matplotlib.pyplot as plt
 from sklearn.metrics.pairwise import cosine_similarity
 ```
 
-We will start by reading in the data as before:
-```{python, eval=FALSE}
+We will start by reading in the [data](https://github.com/erictria/cf-tutorial/blob/main/unscaled_title_data.csv) as before:
+```{python}
 rating_df = pd.read_csv('unscaled_title_data.csv')
-rating_df.head()
-```
-
-```
-customer_ids = py_netflix_data['Cust_Id'].iloc[0:100]
-rating_df = py_netflix_data.iloc[0:100,1:51]
 rating_df.head()
 ```
 
 We will then normalize the ratings using the technique we discussed earlier, by subtracting each user rating with the average rating of that user.
 
-```{python, eval=FALSE}
+```{python}
 scaled_df = rating_df.copy().iloc[:,1:]
 
 for i in range(len(rating_df)):
   scaled_df.iloc[i,:] = (scaled_df.iloc[i,:] - scaled_df.mean(axis=1).values[i]) 
 
 scaled_df = scaled_df.fillna(0) # fillna(0) should come after scaling
-scaled_df["Cust_ID"] = rating_df["Cust_ID"]
-scaled_df = pd.concat([pd.DataFrame({"Cust_Id": scaled_df["Cust_ID"]}), scaled_df.iloc[:,1:]], axis = 1)
+scaled_df["Cust_Id"] = rating_df["Cust_Id"]
+scaled_df = pd.concat([pd.DataFrame({"Cust_Id": scaled_df["Cust_Id"]}), scaled_df.iloc[:,1:]], axis = 1)
 scaled_df.head()
 ```
 
 Now we will create functions for finding similarities for users:
-```{python, eval=FALSE}
+```{python}
 def indices(lst, item):
   return [i for i, x in enumerate(lst) if x == item]
 ```
-```{python, eval=FALSE}
+```{python}
 def return_similarity(current_rating, idx):
   similarity_list = []
   for i in range(len(scaled_df)):
@@ -548,10 +542,10 @@ def return_similarity(current_rating, idx):
 ```
 
 We also have a function for displaying our results later on:
-```{python, eval=FALSE}
+```{python}
 def plot_rating(expected_dict, idx):
   title = expected_dict.keys()
-  rating = expected_dict.values() + averages[]
+  rating = expected_dict.values()
   recommended = []
   for score in rating:
     if score > 0:
@@ -567,7 +561,7 @@ def plot_rating(expected_dict, idx):
 
 
 This is the main function. We will use weighted averages to recommend movies for a user.
-```{python, eval=FALSE}
+```{python}
 def get_similarity(idx):
   current_rating = np.array([scaled_df.iloc[idx,1:]]) # rating of the current user
 
@@ -586,7 +580,8 @@ def get_similarity(idx):
     count = 0
     movie_idx = indices(ratings, rating)[idx_count] #ratings.index(rating)
     numerator = 0
-    denominator = sum(similarity_list) # denominator is just adding up all similarity scores
+    denominator = 0
+
     
     # print("Predicting movie:", raw_titles[movie_idx])
     idx_count += 1
@@ -595,9 +590,15 @@ def get_similarity(idx):
       if j == idx: # don't add up my own rating
         continue
       other_rating = round(scaled_df.iloc[j,movie_idx+1],3)
-      # numerator is iteratively adding up each rating x each similarity score
-      numerator = numerator + (other_rating * similarity_list[count])
+      other_similarity = similarity_list[count]
       count += 1
+      
+      if other_rating == 0: # we do not consider the similarity of unwatched user because it only affects denominator, but not numerator
+        continue
+
+      # numerator is iteratively adding up each rating x each similarity score
+      numerator = numerator + (other_rating * other_similarity)
+      denominator += other_similarity
 
     if denominator == 0: # avoid zero division error
       expected_rating = 0
@@ -611,47 +612,47 @@ def get_similarity(idx):
 
 Let's put these functions to work and make recommendations for some users!
 
-```{python, eval=FALSE}
+```{python}
 # user at index 1
 user_1_recos = get_similarity(1)
 ```
-```{python, eval=FALSE}
+```{python}
 # top movies recommended for user at index 1
 user_1_recos[1]
 ```
 
-```{python, eval=FALSE}
+```{python}
 # user at index 2
 user_2_recos = get_similarity(2)
 ```
-```{python, eval=FALSE}
+```{python}
 # top movies recommended for user at index 2
 user_2_recos[1]
 ```
 
-```{python, eval=FALSE}
+```{python}
 # user at index 175
 user_175_recos = get_similarity(175)
 ```
-```{python, eval=FALSE}
+```{python}
 # top movies recommended for user at index 175
 user_175_recos[1]
 ```
 
-```{python, eval=FALSE}
+```{python}
 # user at index 440
 user_440_recos = get_similarity(440)
 ```
-```{python, eval=FALSE}
+```{python}
 # top movies recommended for user at index 440
 user_440_recos[1]
 ```
 
-```{python, eval=FALSE}
+```{python}
 # user at index 999
 user_999_recos = get_similarity(999)
 ```
-```{python, eval=FALSE}
+```{python}
 # top movies recommended for user at index 999
 user_999_recos[1]
 ```
