@@ -20,9 +20,11 @@ options(dplyr.summarise.inform = FALSE)  # ignore dplyr message about grouping
 Let's suppose it's 2010 and you've just finished watching a collection of 4 movies on your handy DVD player. You still have some free time left and you decide that you want to spend the remainder of your time watching more movies. You have 3 other DVDs lying around, but you do not know which one will be good to watch - a travesty! In order to resolve this, you call up some of your closest friends and ask them to rate the DVD options that you have. While you're at it, you ask your friends to also rate the movies you already watched. 
 
 Let's say there are 4 movies that you already watched: 
+
 - WM1, WM2, WM3, WM4
 
 And let's say the 3 new movies you're deciding between are:
+
 - NM1, NM2, NM3
 
 You were able to get a response from 3 of your friends: Hyun, Eric, and Chunru. They weren't able to provide ratings for all 7 movies, but you were still able to summarize their responses in a simple table:
@@ -109,6 +111,16 @@ $\frac{(5\times3) + (2\times4) + (1\times5) + (3\times3)}{\sqrt{5^2+3^2+2^2+1^2+
 
 Since a larger cosine value implies a smaller angle and therefore a smaller distance, this measure tells us that Hyun is closer to Chunru than to Eric.
 
+These similarity values will then be used as weights for the weighed average that will be used to predict the missing ratings. For example, let's say you are predicting the rating of user $u_1$ for a movie denoted as $r_1$ given similarities $s_{12}$ and $s_{13}$ with users $u_2$ and $u_3$. The rating of $u_1$, which we can denote as $r_1$ will be:
+
+$r_1 = \frac{r_2s_{12} + r_3s_{13}}{s_{12} + s_{13}}$
+
+In general, this will be:
+
+$r_i = \frac{\sum_{k=1}^{K}r_ks_{ik}}{\sum_{k=1}^K s_{ik}}$
+
+$K$ is the total number of users and $k \in 1,..,K$ where $k \neq i$ and $r_k \neq 0$
+
 In addition, we can normalize ratings by subtracting the average rating of each user. In this case, the movies with low ratings would become negative and those with high ratings would be positive. Users with contrasting ratings on movies would have cosine vectors in opposite directions, while users with similar ratings would have smaller distances between them ([Ullman et al., 2014](http://infolab.stanford.edu/~ullman/mmds/ch9.pdf)).
 
 In our example, the utility matrix after normalizing the ratings would be:
@@ -129,6 +141,8 @@ The cosine of the angle between Hyun and Chunru is:
 $\frac{(2\times-0.2) + (-1\times0.8) + (-2\times1.8)}{\sqrt{2^2+(-1^2)+(-2^2)+1^2}\sqrt{(-0.2^2)+(-2.2^2)+0.8^2+1.8^2+(-0.2^2)}} = -0.512$
 
 Using the normalized values, we find that Hyun is closer to Eric than to Chunru.
+
+We can then proceed to calculate ratings using the weighted average formula as discussed previously.
 
 ## UV (Matrix) Decomposition 
 
