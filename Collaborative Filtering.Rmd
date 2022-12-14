@@ -156,7 +156,7 @@ In the cosine distance approach we discussed previously, we treat all blank entr
 
 Let's take an example, with a given utility matrix M that has n rows and m columns (i.e., in our example utility matrix there are 4 users and 7 movies, so matrix M is $4 \times 7$). We can decompose matrix M as the product of a $n \times d$ matrix U and a $d \times m$ matrix V. Afterwards, we can choose matrices U and V whose product matrix UV closely approximates M for the **non-blank** entries. Note that the dimension d is not important here, as long as the columns in matrix U is the same as the rows in matrix V. Once we obtain these two matrices, we can then derive the corresponding **blank** entries in the utility matrix M ([Ullman et al., 2014](http://infolab.stanford.edu/~ullman/mmds/ch9.pdf)). 
 
-In our example, we decompose the utility matrix M ($4 \times 7$), into two matrix U ($4 \times 2$) and V ($2 \times 7$):
+In our example, we decompose the utility matrix M ($4 \times 7$), into two matrices U ($4 \times 2$) and V ($2 \times 7$):
 
 $$
 \begin{bmatrix}
@@ -237,9 +237,9 @@ $$
 = (4-x)^2 + (2-x)^2 + (1-x)^2 + (-x)^2 + (3-x)^2 + (2-x)^2
 $$
 
-We want a value of x that minimizes the sum, so we take the derivative and set that equal to 0:
+We want a value of $x$ that minimizes the sum, so we take the derivative and set that equal to 0:
 $$ -2((4-x)+ (2-x)+ (1-x)+ (-x) + (3-x) + (2-x)) = 0 $$
-From this equation we get x = 2. 
+From this equation we get $x = 2$. 
 
 Afterwards, we can update the U and V matrices with the entry that $u_{11}=2$.
 
@@ -276,7 +276,7 @@ Now that we've discussed the math behind this, let's move on to some coding!
 
 # Coding Example (R)
 
-To apply the concepts we've learned so far, let us implement these concepts in R. R has a built-in library *recommenderlab*, which we will go to later. Before going through that, let's first implement a basic cosine similarity solution manually in order to illustrate the point.
+To apply the concepts we've learned so far, let us implement these concepts in R. R has a built-in library *recommenderlab*, which we will get to later. Before that, let's first implement a basic cosine similarity solution manually in order to illustrate the point.
 
 ::: {.solution}
 ```{r packages, message=FALSE, warning=FALSE}
@@ -483,7 +483,7 @@ netflix_reco_uv <- Recommender(getData(split_data, "train"), "SVDF",
       param=list(k = 4))
 ```
 
-The *calcPredictioAccuracy* function calculates the Root Mean Square Error (RMSE), Mean Squared Error (MSE), and Mean Absolute Error (MAE)s for each of the models. This follows an approach suggested in the *recommenderlab* package, where we first use the known portion of the test set to make predictions and then calculate the error between those predictions and the test data's unknown portion ([Topor, 2017](https://rpubs.com/jt_rpubs/285729)).
+The *calcPredictioAccuracy* function calculates the Root Mean Square Error (RMSE), Mean Squared Error (MSE), and Mean Absolute Error (MAE) for each of the models. This follows an approach suggested in the *recommenderlab* package, where we first use the known portion of the test set to make predictions and then calculate the error between those predictions and the test data's unknown portion ([Topor, 2017](https://rpubs.com/jt_rpubs/285729)).
 ```{r}
 netflix_predictions <- predict(netflix_reco, getData(split_data, "known"), type="ratings")
 netflix_predictions_centered <- predict(netflix_reco_centered, getData(split_data, "known"), type="ratings")
@@ -716,7 +716,7 @@ res5[1]
 
 User at Index 498 will also probably enjoy the top two new movies recommended to him, which are *The Last Samurai* and *Mystic River*.
 
-Now, let's try this out with a bigger dataset. We will use this [file](https://github.com/erictria/cf-tutorial/blob/main/rating_before_scaling.csv) which has 1000 users and 500 movies.
+Now, let's try this out with a bigger dataset. We will use this [file](https://github.com/erictria/cf-tutorial/blob/main/rating_before_scaling.csv) that has data on 1000 users and 500 movies.
 
 ```{python, eval=FALSE}
 # 1000 x 500
@@ -807,13 +807,14 @@ big_res5 = get_similarity(999, big_scaled_df)
 big_res5[1]
 ```
 ![User at Index 999 Movie Rankings](pic24.png){#id .class width=50% height=50%}
+
 User at Index 999 looks like he will enjoy *Schindler's List*. Interestingly, he also has a lot of Disney movies recommended to him.
 
 **Limitation of this Implementation:**
 
-Since the quality of rating prediction heavily depends on the ratings of other users, collaborative filtering requires as many observations as possible. Small number of users produces biased results and sparse movie ratings for a movie gives small similarities among users, thus leading to imprecise prediction. On the other hand, since our main function for predicting rating has time complexity: $O(n^2)$, it is hard to run predictions for every single user, which takes a huge amount of time. Therefore, the more efficient methodology for rating prediction is desirable. Lastly, since collaborative filtering only compares the similarity between one user and the others, it does not consider the content side of things such as genre, director, and length of a movie. Hence, detailed and tailored recommendation might be difficult in that sense. In this regard, content-based recommendation can be implemented used. Ullman et al. (2014) provides a good explanation of that technique in their [book](http://infolab.stanford.edu/~ullman/mmds/ch9.pdf).
+Since the quality of rating prediction heavily depends on the ratings of other users, collaborative filtering requires as many observations as possible. A small number of users produces biased results and sparse movie ratings for a movie gives small similarities among users, thus leading to imprecise predictions. On the other hand, since our main function for predicting rating has a time complexity of  $O(n^2)$, it is hard to run predictions for every single user, which takes a huge amount of time. Therefore, the more efficient methodology for rating prediction is desirable. Lastly, since collaborative filtering only compares the similarity between one user and the others, it does not consider the content side of things such as genre, director, and length of a movie. Hence, detailed and tailored recommendation might be difficult in that sense. In this regard, content-based recommendation can be implemented used. Ullman et al. (2014) provides a good explanation of that technique in their [book](http://infolab.stanford.edu/~ullman/mmds/ch9.pdf).
 
-In this secion, we were able to create a simple Collaborative Filtering Recommendation model using cosine similarity. Go ahead and try out different techniques as well!
+In this section, we were able to create a simple Collaborative Filtering Recommendation model using cosine similarity. Go ahead and try out different techniques as well!
 
 :::
 
