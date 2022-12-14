@@ -90,21 +90,26 @@ Before implementing collaborative filtering recommendation systems, we will firs
 
 ## Cosine Distance
 
-To measure the similarity of users from the utility matrix, we can use the Cosine Distance method, which calculates the angle between the ratings of different users. In this method, we treat the blank entries as zero. One thing to note about this method is that it latently treats the lack of a rating as disliking the movie (i.e. rating = 0) (Ullman).
+To measure the similarity of users from the utility matrix, we can use the Cosine Distance method, which calculates the angle between the ratings of different users. In this method, we treat the blank entries as zero. One thing to note about this method is that it latently treats the lack of a rating as disliking the movie (i.e. rating = 0) ([Ullman et al.](http://infolab.stanford.edu/~ullman/mmds/ch9.pdf)).
 
-[ADD GENERALIZED FORMULA?]
+Suppose there two users with vectors of size $J$ that denote their movie ratings where $J$ is the number of items in the utility matrix. The two vectors are $v_{1i}$ and $v_{2i}$, respectively where $i \in 1,...,J$. The cosine similarity between the users can then be computed using the following formula:
 
-Using our example, we can check the similarity of some of your friends. To get the cosine angle between Hyun and Eric, we can use this equation:
+$$
+\frac{\sum_{i=1}^{J} v_{1i}v_{2i}}{\sqrt{\sum_{i=1}^{J} v_{1i}^2}\sqrt{\sum_{i=1}^{J} v_{2i}^2}}
+$$
+In this formula, the numerator is the sum of the product of common entries, and the denominator takes the product of the square root of the summation of squared values for each user. Note that this method treats blank entries as zero.
+
+Using our example, we can check the similarity of some of your friends. To get the cosine angle between Hyun and Eric, we can plug in the values from the utility matrix into our formula to get this equation:
 
 $\frac{(2\times5) + (4\times2) + (3\times5)}{\sqrt{5^2+3^2+2^2+1^2+4^2+3^2}\sqrt{4^2+5^2+2^2+5^2}} = 0.493$
 
-We can also check for the cosine angle between Hyun and Chunru:
+We can also check for the cosine angle between Hyun and Chunru using the same method:
 
 $\frac{(5\times3) + (2\times4) + (1\times5) + (3\times3)}{\sqrt{5^2+3^2+2^2+1^2+4^2+3^2}\sqrt{3^2+1^2+4^2+5^2+3^2}} = 0.597$
 
 Since a larger cosine value implies a smaller angle and therefore a smaller distance, this measure tells us that Hyun is closer to Chunru than to Eric.
 
-In addition, we can normalize ratings by subtracting the average rating of each user. In this case, the movies with low ratings would become negative and those with high ratings would be positive. Users with contrasting ratings on movies would have consine vectors in opposite direction, while users with similar ratings would have smaller distances between them (Ullman).
+In addition, we can normalize ratings by subtracting the average rating of each user. In this case, the movies with low ratings would become negative and those with high ratings would be positive. Users with contrasting ratings on movies would have cosine vectors in opposite direction, while users with similar ratings would have smaller distances between them ([Ullman et al.](http://infolab.stanford.edu/~ullman/mmds/ch9.pdf)).
 
 In our example, the utility matrix after normalizing would be:
 
@@ -115,7 +120,7 @@ In our example, the utility matrix after normalizing would be:
 | Chunru | -0.2| -2.2|     | 0.8 | 1.8 |     | -0.2|
 | You    | 0.5 | -1.5| -0.5| 1.5 |     |     |     |
 
-Then the cosine of the angle between Hyun and Eric is:
+Using the same formula earlier but with normalized values, the cosine of the angle between Hyun and Eric is:
 
 $\frac{(-1\times1) + (1\times-2)}{\sqrt{2^2+(-1^2)+(-2^2)+1^2}\sqrt{1^2+(-2^2)+1^2}} = -0.387$
 
@@ -123,7 +128,7 @@ The cosine of the angle between Hyun and Chunru is:
 
 $\frac{(2\times-0.2) + (-1\times0.8) + (-2\times1.8)}{\sqrt{2^2+(-1^2)+(-2^2)+1^2}\sqrt{(-0.2^2)+(-2.2^2)+0.8^2+1.8^2+(-0.2^2)}} = -0.512$
 
-Still we can see that Hyun is closer to Chunru than to Eric.
+Using the normalized values, we find that Hyun is closer to Eric than to Chunru.
 
 ## UV (Matrix) Decomposition (Need to Paraphrase)
 
@@ -372,6 +377,7 @@ We will create three versions:
 3. Recommender using UV decomposition
 
 ```{r}
+set.seed(6030)
 # Non-normalized cosine
 reco <- Recommender(rmat, "UBCF", 
       param=list(normalize = NULL, method="Cosine"))
@@ -427,6 +433,8 @@ netflix_rmat <- as(netflix_rmat, "realRatingMatrix")
 
 We can then split the data using the *evaluationScheme* function. We can also set a *goodRating* value. Since the ratings are on a scale of 1-5, we will use 3 for this example.
 ```{r}
+set.seed(6030)
+
 # split the data into the training and the test set:
 split_data <- evaluationScheme(
   netflix_rmat, 
@@ -440,6 +448,7 @@ split_data <- evaluationScheme(
 
 We can then build our models using the training data:
 ```{r}
+set.seed(6030)
 # Non-normalized cosine
 netflix_reco <- Recommender(getData(split_data, "train"), "UBCF", 
       param=list(normalize = NULL, method="Cosine"))
@@ -469,28 +478,26 @@ error_results
 
 From these results, we can see that the Cosine Normalized model produced the lowest RMSE and MSE values for the Netflix data.
 
-We discussed a few ways to create and test recommendation models in this section, but there are many more for you to explore. If you want to explore other methods, Topor discusses a lot of interesting variations in his [article](https://rpubs.com/jt_rpubs/285729). The *recommenderlab* [documentation](https://cran.r-project.org/web/packages/recommenderlab/) and [code repository](https://github.com/cran/recommenderlab) is also very detailed. 
+We discussed a few ways to create and test recommendation models in this section, but there are many more for you to explore. If you want to explore other methods, Topor discusses a lot of interesting variations in his [article](https://rpubs.com/jt_rpubs/285729). The *recommenderlab* [documentation](https://cran.r-project.org/web/packages/recommenderlab/) and [code repository](https://github.com/cran/recommenderlab) are also very detailed and good places to start. 
 
 :::
 
-In addition, we will discuss a simple example coded in Python as well to show the steps for a bigger example.
-
 # Coding Example (Python)
+Next up, we will discuss a simple example coded in Python as well to show the steps for a bigger example.
 
 We will be using the same Netflix [data](https://www.kaggle.com/datasets/netflix-inc/netflix-prize-data) we used earlier. The full notebook for this example can be found [here](https://github.com/erictria/cf-tutorial/blob/main/Netflix.ipynb).
 
-```{r}
+```{r, echo=FALSE}
 library(reticulate)
 knitr::opts_chunk$set(python.reticulate=FALSE)
-#use_python("/Users/erictria/opt/anaconda3/bin/python")
 ```
 
-For this Python example, we will be using the *cosine_similarity* function from the *sklearn* library. 
+For this Python example, we will be using the *cosine_similarity* function from the *sklearn* library. We will implement collaborative filtering using cosine similarity and normalizing the utility matrix by subtracting the average rating of each user.
 
 ::: {.solution}
 
-First, we have to implement the necessary libraries for this example:
-```{python}
+First, we have to import the necessary libraries for this example:
+```{python, eval=FALSE}
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -499,166 +506,204 @@ from sklearn.metrics.pairwise import cosine_similarity
 ```
 
 We will start by reading in the [data](https://github.com/erictria/cf-tutorial/blob/main/unscaled_title_data.csv) as before:
-```{python}
+```{python, eval=FALSE}
 rating_df = pd.read_csv('unscaled_title_data.csv')
 rating_df.head()
 ```
+![Rating Dataframe](pic1.png)
 
 We will then normalize the ratings using the technique we discussed earlier, by subtracting each user rating with the average rating of that user.
 
-```{python}
-scaled_df = rating_df.copy().iloc[:,1:]
-
+```{python, eval=FALSE}
+scaled_df = rating_df.copy().iloc[:,1:] # remove the customer id column
+averages = scaled_df.mean(axis=1).values
 for i in range(len(rating_df)):
-  scaled_df.iloc[i,:] = (scaled_df.iloc[i,:] - scaled_df.mean(axis=1).values[i]) 
+    # Subtract by mean of each user, not the entire user
+    scaled_df.iloc[i,:] = (scaled_df.iloc[i,:] - averages[i]) 
 
 scaled_df = scaled_df.fillna(0) # fillna(0) should come after scaling
-scaled_df["Cust_Id"] = rating_df["Cust_Id"]
-scaled_df = pd.concat([pd.DataFrame({"Cust_Id": scaled_df["Cust_Id"]}), scaled_df.iloc[:,1:]], axis = 1)
-scaled_df.head()
+scaled_df.insert(loc=0, column='Cust_Id', value=rating_df["Cust_Id"])
+scaled_df
 ```
+![Scaled Dataframe](pic2.png)
 
 Now we will create functions for finding similarities for users:
-```{python}
+```{python, eval=FALSE}
 def indices(lst, item):
-  return [i for i, x in enumerate(lst) if x == item]
+    return [i for i, x in enumerate(lst) if x == item]
 ```
-```{python}
+```{python, eval=FALSE}
 def return_similarity(current_rating, idx):
-  similarity_list = []
-  for i in range(len(scaled_df)):
-      if i == idx:
-        continue
-      another_rating = np.array([scaled_df.iloc[i,1:]]) # rating of another 
-      curr_similarity = round(cosine_similarity(current_rating, another_rating)[0][0], 3)
-      similarity_list.append(curr_similarity)
+    similarity_list = []
+    for i in range(len(scaled_df)):
+        if i == idx:
+            continue
+        another_rating = np.array([scaled_df.iloc[i,1:]]) # rating of another user
+        curr_similarity = round(cosine_similarity(current_rating, another_rating)[0][0], 3)
+        similarity = {
+            'user_idx': i,
+            'cosine_similarity': curr_similarity
+        }
+        similarity_list.append(similarity)
 
-  current_id = scaled_df.iloc[[idx]]["Cust_Id"].values[0]
-  max_similarity = max(similarity_list)
-  max_idx = similarity_list.index(max_similarity)
-  target_id = scaled_df.iloc[[max_idx]]["Cust_Id"].values[0]
-
-  return similarity_list
+    return similarity_list
 ```
 
 We also have a function for displaying our results later on:
-```{python}
+```{python, eval=FALSE}
 def plot_rating(expected_dict, idx):
-  title = expected_dict.keys()
-  rating = expected_dict.values()
-  recommended = []
-  for score in rating:
-    if score > 0:
-      recommended.append(True)
-    else:
-      recommended.append(False)
-  df = pd.DataFrame({"Title" : title, "Expected Rating": rating, "Recommended" : recommended}).sort_values(by = "Expected Rating", ascending = False)
-  plt.figure(figsize=(20, 7))
-  plt.xticks(rotation=90)
-  plt.title("Predicted Rating for Unwatched Movies and Recommendation")
-  return (sns.barplot(x = "Title", y = "Expected Rating", hue = "Recommended", data = df), df.iloc[:10,:])
+    title = expected_dict.keys()
+    rating = expected_dict.values()
+    recommended = []
+    for score in rating:
+        if score > 0:
+            recommended.append(True)
+        else:
+            recommended.append(False)
+            
+    df = pd.DataFrame({
+        "Title": title, 
+        "Expected Rating": rating, 
+        "Recommended": recommended
+    }).sort_values(by = "Expected Rating", ascending = False)
+    plt.figure(figsize=(20, 7))
+    plt.xticks(rotation=90)
+    plt.title("Predicted Rating for Unwatched Movies and Recommendation")
+    
+    # return the plot and a dataframe of the top 10 recommended movies
+    return (sns.barplot(x = "Title", y = "Expected Rating", hue = "Recommended", data = df), df.iloc[:10,:])
 ```
 
+Get the list of movie titles:
+```{python, eval=FALSE}
+movie_titles = scaled_df.columns[1:] # exclude the customer id column
+```
 
-This is the main function. We will use weighted averages to recommend movies for a user.
-```{python}
+This is the main function. We will use weighted averages to recommend movies for a user. The weights used are the similarity scores between users. Only users who have rated the movie in question will be included in the weighted average.
+
+This function will be making predictions on the movies that a user has *not* watched yet. Since our ratings our normalized, positive values would mean better ratings than the negative ones.
+```{python, eval=FALSE}
 def get_similarity(idx):
-  current_rating = np.array([scaled_df.iloc[idx,1:]]) # rating of the current user
+    current_rating = np.array([scaled_df.iloc[idx,1:]]) # rating of the current user
+  
+    # BASE CASE: if the user has watched all movies, then returns nothing.
+    if 0 not in current_rating: 
+        print("This user has watched all the movies.")
+        return -1
 
-  if 0 not in current_rating: # BASE CASE: if the user has watched all movies, then returns nothing.
-    print("This user has watched all the movies.")
-    return -1
+    similarity_list = return_similarity(current_rating, idx)
 
-  similarity_list = return_similarity(current_rating, idx)
+    ratings = current_rating[0].tolist()
+    expected_dict = dict()
+    for movie in movie_titles:
+        rating = scaled_df[movie].iloc[idx]
+        
+        # skip if the user has already seen a movie
+        if rating != 0: 
+            continue
 
-  idx_count = 0
-  ratings = current_rating[0].tolist()
-  expected_dict = dict()
-  for rating in ratings: 
-    if rating != 0: # skip if the user has already seen a movie
-      continue
-    count = 0
-    movie_idx = indices(ratings, rating)[idx_count] #ratings.index(rating)
-    numerator = 0
-    denominator = 0
+        numerator = 0
+        denominator = 0        
+        for similarity in similarity_list:
+            other_idx = similarity['user_idx']
+            other_similarity = similarity['cosine_similarity']
+            other_user_rating = round(scaled_df[movie].iloc[other_idx], 3)
+            
+            # we do not consider the similarity of unwatched user 
+            # because it only affects the denominator but not numerator
+            if other_user_rating == 0: 
+                continue
 
-    
-    # print("Predicting movie:", raw_titles[movie_idx])
-    idx_count += 1
+            # numerator is iteratively adding up each rating x each similarity score
+            numerator = numerator + (other_user_rating * other_similarity)
+            denominator += other_similarity
 
-    for j in range(len(scaled_df)):
-      if j == idx: # don't add up my own rating
-        continue
-      other_rating = round(scaled_df.iloc[j,movie_idx+1],3)
-      other_similarity = similarity_list[count]
-      count += 1
-      
-      if other_rating == 0: # we do not consider the similarity of unwatched user because it only affects denominator, but not numerator
-        continue
+        if denominator == 0: # avoid zero division error
+            expected_rating = 0
+        else:
+            expected_rating = round(numerator / denominator, 2)
 
-      # numerator is iteratively adding up each rating x each similarity score
-      numerator = numerator + (other_rating * other_similarity)
-      denominator += other_similarity
+        expected_dict[movie] = expected_rating
 
-    if denominator == 0: # avoid zero division error
-      expected_rating = 0
-    else:
-      expected_rating = round(numerator / denominator, 2)
-
-    expected_dict[raw_titles[movie_idx]] = expected_rating
-
-  return plot_rating(expected_dict, idx)
+    return plot_rating(expected_dict, idx)
 ```
 
 Let's put these functions to work and make recommendations for some users!
 
-```{python}
+```{python, eval=FALSE}
 # user at index 1
-user_1_recos = get_similarity(1)
+res1 = get_similarity(1)
 ```
-```{python}
+![User at Index 1 Results](pic3.png)
+```{python, eval=FALSE}
 # top movies recommended for user at index 1
-user_1_recos[1]
+res1[1]
 ```
+![User at Index 1 Movie Rankings](pic4.png){#id .class width=50% height=50%}
 
-```{python}
-# user at index 2
-user_2_recos = get_similarity(2)
-```
-```{python}
-# top movies recommended for user at index 2
-user_2_recos[1]
-```
+User at Index 1 will probably not enjoy the new movies recommended to him, but out of all the movies, *The Patriot* is at the top of the list.
 
-```{python}
-# user at index 175
-user_175_recos = get_similarity(175)
+```{python, eval=FALSE}
+# user at index 160
+res2 = get_similarity(160)
 ```
-```{python}
-# top movies recommended for user at index 175
-user_175_recos[1]
-```
+![User at Index 160 Results](pic5.png)
 
-```{python}
+```{python, eval=FALSE}
+# top movies recommended for user at index 160
+res2[1]
+```
+![User at Index 160 Movie Rankings](pic6.png){#id .class width=50% height=50%}
+
+User at Index 160 will also probably not enjoy the new movies recommended to him, but out of all the movies, *The Patriot* is also at the top of his list.
+
+```{python, eval=FALSE}
+# user at index 200
+res3 = get_similarity(200)
+```
+![User at Index 200 Results](pic7.png)
+
+```{python, eval=FALSE}
+# top movies recommended for user at index 200
+res3[1]
+```
+![User at Index 200 Movie Rankings](pic8.png){#id .class width=50% height=50%}
+
+User at Index 200 will probably enjoy the top two new movies recommended to him, which are *Spider-Man 2* and *Mystic River*.
+
+```{python, eval=FALSE}
 # user at index 440
-user_440_recos = get_similarity(440)
+res4 = get_similarity(440)
 ```
-```{python}
+![User at Index 440 Results](pic9.png)
+```{python, eval=FALSE}
 # top movies recommended for user at index 440
-user_440_recos[1]
+res4[1]
 ```
+![User at Index 440 Movie Rankings](pic10.png){#id .class width=50% height=50%}
 
-```{python}
-# user at index 999
-user_999_recos = get_similarity(999)
-```
-```{python}
-# top movies recommended for user at index 999
-user_999_recos[1]
-```
+User at Index 440 will probably enjoy the top new movie recommended to him, which is *The Last Samurai*.
 
+```{python, eval=FALSE}
+# user at index 498
+res5 = get_similarity(498)
+```
+![User at Index 498 Results](pic11.png)
+
+```{python, eval=FALSE}
+# top movies recommended for user at index 498
+res5[1]
+```
+![User at Index 498 Movie Rankings](pic12.png){#id .class width=50% height=50%}
+
+User at Index 498 will also probably enjoy the top two new movies recommended to him, which are *The Last Samurai* and *Mystic River*.
+
+Using cosine similarity, we were able to create a simple Collaborative Filtering Recommendation model. Go ahead and try out different techniques as well!
 
 :::
+
+# Conclusion
+
 
 # References
 
@@ -674,6 +719,6 @@ Shummon Maas, L., (2019, June 11). Recommendation Systems using UV-Decomposition
 
 Topor, J., (2017, June 11). User-Based and Item-Based Collaborative Filtering. RPubs. Retrieved December 13, 2022, from https://rpubs.com/jt_rpubs/285729
 
-Ullman, J., Leskovec, J., Rajaraman, A., (2012, July 4). Mining Massive Datasets. Cambridge University Press. Retrieved December 7, 2022, from http://infolab.stanford.edu/~ullman/mmds/book.pdf 
+Ullman, J., Leskovec, J., Rajaraman, A., (2012, July 4). Mining Massive Datasets: Chapter 9. Cambridge University Press. Retrieved December 7, 2022, from http://infolab.stanford.edu/~ullman/mmds/ch9.pdf and http://infolab.stanford.edu/~ullman/mmds/book.pdf 
 
 
