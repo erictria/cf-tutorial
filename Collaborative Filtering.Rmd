@@ -57,13 +57,13 @@ Before jumping into the math, it is important to go through some examples of rec
 
 ## Recommendation Systems
 
-We mentioned earlier that recommendation systems are being applied in different technologies nowadays (Ullman). Some of these are:
+We mentioned earlier that recommendation systems are being applied in different technologies nowadays ([Ullman et al., 2014](http://infolab.stanford.edu/~ullman/mmds/ch9.pdf)). Some of these are:
 
 1. Movie Recommendations - Like the initial example, recommending movies is one of the most popular examples for recommendation systems. Streaming services such as Netflix, Hulu, Disney, and others all provide recommendations for their users to try. 
-2. Product Recommendations - Online shopping is another one of the avenues where recommendation systems are very useful. Users receive suggestions on products to buy based on what similar users are buying.
-3. Song Recommendations - Another example of recommendation systems are with music streaming services where users recveive suggestions for songs that they can add to their playlists.
+2. Product Recommendations - Online shopping is another one of the avenues where recommendation systems are very useful. Users receive suggestions on which products to buy based on what similar users are buying.
+3. Song Recommendations - Another example of recommendation systems are with music streaming services where users receive suggestions for songs that they can add to their respective playlists.
 
-There are definitely are more examples but these should be able to provide an idea of the vastness of use cases where recommendation systems can be applied. Recommendation systems are helpful in recommending a wider range of items to its users where a physical store would not be able to.
+There are definitely more examples but these should be able to give us an idea of the vastness of use cases where recommendation systems can be applied. This technology has been able to push many business forwards by helping out in increasing sales, user interaction, and more.
 
 ## The Utility Matrix
 
@@ -76,13 +76,13 @@ Recall the table we created earlier for the initial example where the different 
 | Chunru | 3   | 1   |     | 4   | 5   |     | 3   |
 | You    | 4   | 2   | 3   | 5   |     |     |     |
 
-Typically, recommendation systems have two types of entities: *users* and *items*. The utility matrix represents the degree of preference that a user has for certain items. In our example, the degree of preference is measured on a movie rating scale of 1 to 5. It is also important to note that it is assumed that the utility matrix is sparse, meaning there are blank values in the matrix. This is good for replicating the real-world scenario where not all users would have a rating for all of the items.
+Typically, recommendation systems have two types of entities: *users* and *items*. The utility matrix represents the degree of preference that a user has for certain items. In our example, the degree of preference is measured on a movie rating scale of 1 to 5. It is also important to note that it is assumed that the utility matrix is sparse, meaning there are blank values in the matrix. This is good for replicating the real-world scenario where not all users would have a rating for all of the items ([Ullman et al., 2014](http://infolab.stanford.edu/~ullman/mmds/ch9.pdf)).
 
-The goal of recommendation systems is to fill out the utility matrix by predicting values for the blank ones. Alternatively, recommendation systems can also predict the values for some entries in each row which are expected to have higher values. This would make it so that the recommendation system does not have to fill out all of the empty cells but just a large subset of cells. Applying techniques such as clustering to the original matrix is also something that be considered so that less values need to be predicted (Ullman).
+The goal of recommendation systems is to fill out the utility matrix by predicting values for the blank ones. Alternatively, recommendation systems can also predict the values for only some entries in each row which are expected to have higher values. This would make it so that the recommendation system does not have to fill out all of the empty cells but just a large subset of cells instead. Applying techniques such as clustering to the original matrix is also something that be considered so that less values would need to be predicted ([Ullman et al., 2014](http://infolab.stanford.edu/~ullman/mmds/ch9.pdf)).
 
 ## Collaborative Filtering
 
-Recommendation systems can be implemented using different techniques, but for this tutorial we will be focusing on collaborative filtering. This technique focuses more on the similarity of users with each other instead of similarity of features between items. This follows the intuition that similar users will tend to prefer similar items and thus the recommendations are based off of this idea (Ullman). You can also think of this in terms of having *neighbors*, where neighbors are based on similar item preferences. A user will receive recommendations that are influenced by what their neighbors prefer (Gormley).
+Recommendation systems can be implemented using different techniques, but for this tutorial we will be focusing on **collaborative filtering**. This technique focuses more on the similarity of users with each other instead of similarity of features between items. This follows the intuition that similar users will tend to prefer similar items and thus the recommendations are based off of this idea ([Ullman et al., 2014](http://infolab.stanford.edu/~ullman/mmds/ch9.pdf)). You can also think of this in terms of having *neighbors*, where neighbors are based on similar item preferences. A user will receive recommendations that are influenced by what their neighbors prefer ([Gormley, 2017](https://www.cs.cmu.edu/~mgormley/courses/10601-s17/slides/lecture25-mf.pdf)).
 
 Before implementing collaborative filtering recommendation systems, we will first discuss the mathematical theory that works in the background. Specifically, we will discuss how collaborative filtering can be done through *cosine similarity* or *matrix decomposition*
 
@@ -90,16 +90,16 @@ Before implementing collaborative filtering recommendation systems, we will firs
 
 ## Cosine Distance
 
-To measure the similarity of users from the utility matrix, we can use the Cosine Distance method, which calculates the angle between the ratings of different users. In this method, we treat the blank entries as zero. One thing to note about this method is that it latently treats the lack of a rating as disliking the movie (i.e. rating = 0) ([Ullman et al.](http://infolab.stanford.edu/~ullman/mmds/ch9.pdf)).
+To measure the similarity of users from the utility matrix, we can use the Cosine Distance method, which calculates the angle between the ratings of different users. In this method, we treat the blank entries as zero. One thing to note about this method is that it latently treats the lack of a rating as disliking the movie (i.e. rating = 0) ([Ullman et al., 2014](http://infolab.stanford.edu/~ullman/mmds/ch9.pdf)).
 
-Suppose there two users with vectors of size $J$ that denote their movie ratings where $J$ is the number of items in the utility matrix. The two vectors are $v_{1i}$ and $v_{2i}$, respectively where $i \in 1,...,J$. The cosine similarity between the users can then be computed using the following formula:
+Suppose there are two users with vectors of size $J$ that denote their movie ratings where $J$ is the number of items in the utility matrix. The two vectors are $v_{1i}$ and $v_{2i}$, respectively where $i \in 1,...,J$. The cosine similarity between the users can then be computed using the following formula:
 
 $$
 \frac{\sum_{i=1}^{J} v_{1i}v_{2i}}{\sqrt{\sum_{i=1}^{J} v_{1i}^2}\sqrt{\sum_{i=1}^{J} v_{2i}^2}}
 $$
 In this formula, the numerator is the sum of the product of common entries, and the denominator takes the product of the square root of the summation of squared values for each user. Note that this method treats blank entries as zero.
 
-Using our example, we can check the similarity of some of your friends. To get the cosine angle between Hyun and Eric, we can plug in the values from the utility matrix into our formula to get this equation:
+Using our example, we can check the similarity of some of the friends in our initial example. To get the cosine angle between Hyun and Eric, we can plug in the values from the utility matrix into our formula to get this equation:
 
 $\frac{(2\times5) + (4\times2) + (3\times5)}{\sqrt{5^2+3^2+2^2+1^2+4^2+3^2}\sqrt{4^2+5^2+2^2+5^2}} = 0.493$
 
@@ -109,9 +109,9 @@ $\frac{(5\times3) + (2\times4) + (1\times5) + (3\times3)}{\sqrt{5^2+3^2+2^2+1^2+
 
 Since a larger cosine value implies a smaller angle and therefore a smaller distance, this measure tells us that Hyun is closer to Chunru than to Eric.
 
-In addition, we can normalize ratings by subtracting the average rating of each user. In this case, the movies with low ratings would become negative and those with high ratings would be positive. Users with contrasting ratings on movies would have cosine vectors in opposite direction, while users with similar ratings would have smaller distances between them ([Ullman et al.](http://infolab.stanford.edu/~ullman/mmds/ch9.pdf)).
+In addition, we can normalize ratings by subtracting the average rating of each user. In this case, the movies with low ratings would become negative and those with high ratings would be positive. Users with contrasting ratings on movies would have cosine vectors in opposite directions, while users with similar ratings would have smaller distances between them ([Ullman et al., 2014](http://infolab.stanford.edu/~ullman/mmds/ch9.pdf)).
 
-In our example, the utility matrix after normalizing would be:
+In our example, the utility matrix after normalizing the ratings would be:
 
 |        | WM1 | WM2 | WM3 | WM4 | NM1 | NM2 | NM3 |
 |--------|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
@@ -130,15 +130,13 @@ $\frac{(2\times-0.2) + (-1\times0.8) + (-2\times1.8)}{\sqrt{2^2+(-1^2)+(-2^2)+1^
 
 Using the normalized values, we find that Hyun is closer to Eric than to Chunru.
 
-## UV (Matrix) Decomposition (Need to Paraphrase)
+## UV (Matrix) Decomposition 
 
-[PARAPHRASE]
-An approach to estimating the blank entries in the utility matrix is to conjecture that the utility matrix is actually the product of two long, thin matrices. 
+In the cosine distance approach we discussed previously, we treat all blank entries as zero. This may lead to us ignoring important information and thus having imprecise predictions. To alleviate this problem, we can use UV decomposition to approximate the utility matrix as the product of two matrices. This is a useful method that can find good estimates for missing values in a matrix ([Shummon Maass, 2019](https://towardsdatascience.com/recommendation-systems-using-uv-decomposition-a1d4116be4a1)). UV decomposition is an instance of a more general theory called singular-value decomposition or SVD.
 
-For example, if we start with the utility matrix M, with n rows and m columns (i.e., here are 4 users and 7 movies, so martix M is $4 \times 7$), then we might be able to find a $n \times d$ matrix U and a $d \times m$ matrix V, such that the product matrxi UV closely approximates M in those entries where M is **nonblank**. After that, we can then use the entries in the product UV to estimate the corresponding **blank** entries in utility matrix M. This process is called UV-decomposition of M.
-[PARAPHRASE]
+Let's take an example, with a given utility matrix M that has n rows and m columns (i.e., in our example utility matrix there are 4 users and 7 movies, so matrix M is $4 \times 7$). We can decompose matrix M as the product of a $n \times d$ matrix U and a $d \times m$ matrix V. Afterwards, we can choose matrices U and V whose product matrix UV closely approximates M for the **non-blank** entries. Note that the dimension d is not important here, as long as the columns in matrix U is the same as the rows in matrix V. Once we obtain these two matrices, we can then use those values to estimate the corresponding **blank** entries in the utility matrix M using this method ([Ullman et al., 2014](http://infolab.stanford.edu/~ullman/mmds/ch9.pdf)). 
 
-In our example, we decompose the utility matrix M ($4 \times 7$), into two matrix U ($4 \times 2$) and V ($2 \times 7$)
+In our example, we decompose the utility matrix M ($4 \times 7$), into two matrix U ($4 \times 2$) and V ($2 \times 7$):
 
 $$
 \begin{bmatrix}
@@ -160,11 +158,11 @@ v_{11} & v_{12} & v_{13} & v_{14} & v_{15} & v_{16} & v_{17} \\
 v_{21} & v_{22} & v_{23} & v_{24} & v_{25} & v_{26} & v_{27} 
 \end{bmatrix}
 $$
-Theoratically, we can find many candidates of matrix U and V, whose product UV is close to V. So we need a measurement to pick the one that is closest to M. The typical choice is called the **root-mean-square error (RMSE)**, where we sum over the square root of the difference of nonblank entries from the martix M and the corresponding entries from product matrix UV. 
+Theoretically, we can find many candidates for matrices U and V, whose product UV is close to the utility matrix M. Because of this, we need a measurement to pick the one that is closest to M. The typical choice for this is the **root-mean-square error (RMSE)**, where the difference being checked is between the non-blank values of M and UV ([Ullman et al., 2014](http://infolab.stanford.edu/~ullman/mmds/ch9.pdf)). 
 
-To find the UV-decomposition matrix with the least RMSE, we start with an arbitrary guess of matrix U and V, and the repeatedly adjusting one entry in U or V to make the RMSE smaller. Here we use our example to show the process of UV-decomposition.
+To find the UV-decomposition matrix with the least RMSE, we start with an arbitrary guess of matrix U and V. For our example, let's set all entries to be one as the starting values. We then repeatedly adjust one entry in U or V to make the RMSE smaller. Here we use our example to show the process of UV-decomposition.
 
-**Step 1 : Start with matrices U and V with all entries 1:**
+**Step 1 : Start with matrices U and V with all entries as 1:**
 
 $$
 \begin{bmatrix}
@@ -217,11 +215,11 @@ $$
 = (4-x)^2 + (2-x)^2 + (1-x)^2 + (-x)^2 + (3-x)^2 + (2-x)^2
 $$
 
-and we want a value of x that minimizes the sum, so we take the derivative and set that equal to 0, as:
+We want a value of x that minimizes the sum, so we take the derivative and set that equal to 0:
 $$ -2((4-x)+ (2-x)+ (1-x)+ (-x) + (3-x) + (2-x)) = 0 $$
-from which we get x = 2. 
+From this equation we get x = 2. 
 
-Now update the U and V martix with the enrty that $u_{11}=2$.
+Afterwards, we can update the U and V matrices with the entry that $u_{11}=2$.
 
 $$
 \begin{bmatrix}
@@ -246,21 +244,22 @@ $$
 
 **Step 3 : Alter $v_{11}$ to reduce the RMSE as much as possible and update $v_{11}$**
 
-**Step 4 : Iterate the steps above again and again until the RMSE.**
+This is similar to step 2 but for the V matrix instead.
 
-[CHECK UV PART IF NEED TO PARAPHRASE]
+**Step 4 : Iterate steps 2 and 3 repeatedly until the RMSE is minimized**
+
+This method is useful especially for utility matrices with a manageable size of users and items. To learn more about ways to implement this, Ullman et al. (2014) provides a good explanation in their [book](http://infolab.stanford.edu/~ullman/mmds/ch9.pdf).
 
 Now that we've discussed the math behind this, let's move on to some coding!
 
 # Coding Example (R)
 
-To apply the concepts we've learned so far, let us implement these concepts in R. R has a built-in library *recommenderlab*, which we will go to later. Before going that, let's first implement a basic cosine similarity solution manually in order to illustrate the point.
+To apply the concepts we've learned so far, let us implement these concepts in R. R has a built-in library *recommenderlab*, which we will go to later. Before going through that, let's first implement a basic cosine similarity solution manually in order to illustrate the point.
 
 ::: {.solution}
 ```{r packages, message=FALSE, warning=FALSE}
-#library(R6030)     # functions for DS 6030
 library(tidyverse) # functions for data manipulation   
-library(recommenderlab) # function for remmondation systems
+library(recommenderlab) # function for recommendation systems
 ```
 
 We will continue to use the initial movie rating example. Let's figure out which movie you should watch out of the three new movies.
@@ -303,7 +302,7 @@ cosine_similarity <- function(vec_1, vec_2) {
 }
 ```
 
-Let's check how similar your taste in movies are to the 3 friends who responded. Remember, the higher cosine similarity value means more similarity.
+Let's check how similar your taste in movies are to the 3 friends who responded. Remember, the higher cosine value means more similarity between two users.
 ```{r}
 # Extract each person's ratings as vectors
 you <- as.numeric(as.vector(movie_ratings['You',]))
@@ -319,7 +318,7 @@ similarities <- data.frame(
 rownames(similarities) <- c('Hyun', 'Eric', 'Chunru')
 similarities
 ```
-Based on these results, we can see that your taste in movies is most similar to Hyun's. We will use these similarity scores as weights for predicting your movie ratings for the three new movies.
+Based on these results, we can see that your taste in movies is most similar to Hyun's. We will use these similarity scores as weights for predicting your movie ratings for the three new movies. For the weighted average, we will only include those users who have rated the movie.
 
 ```{r}
 # Function for computing the weighted average
@@ -353,9 +352,9 @@ new_movie_predicted_ratings
 ```
 Based on these predictions, it looks like you will probably like NM3 the most out of all the options.
 
-Now that we were able to get a feel of how collaborative filtering works through cosine similarity, we will now discuss how to make recommendations using the *recommenderlab* library as Topor explains in his [article](https://rpubs.com/jt_rpubs/285729).
+Now that we were able to get a feel for how collaborative filtering works through cosine similarity, we will now discuss how to make recommendations using the *recommenderlab* library as Topor (2017) explains in his [article](https://rpubs.com/jt_rpubs/285729).
 
-We will start by converting our dataframe to a *realRatingMatrix* object:
+We will start by converting our data frame to a *realRatingMatrix* object:
 ```{r}
 # convert the movie ratings data frame to a matrix
 rmat <- as.matrix(movie_ratings)
@@ -364,7 +363,7 @@ rmat <- as.matrix(movie_ratings)
 rmat <- as(rmat, "realRatingMatrix")
 ```
 
-We can then proceed to creating our *Recommender* models. The library contains the options we discussed earlier in this tutorial. Hahsler discusses this in the package [documentation](https://cran.r-project.org/web/packages/recommenderlab/).
+We can then proceed to creating our *Recommender* models. The library contains the options we discussed earlier in this tutorial. Hahsler (2022) discusses these options in the package [documentation](https://cran.r-project.org/web/packages/recommenderlab/).
 
 The type *UBCF* stands for *User-Based Collaborative Filtering* which we can use to apply cosine similarity and normalization. The implementation of *recommenderlab* also makes use of a k-nearest neighbors algorithm when building this type of recommender as seen in the package [source code](https://github.com/cran/recommenderlab).
 
@@ -407,9 +406,9 @@ predictions_uv <- predict(reco_uv, rmat, type="ratings")
 print('UV Decomposition')
 predictions_uv@data
 ```
-As we can see from the results, NM3 has the highest predicted rating for 2 out of the 3 models. This just shows how recommender systems can be built using different distance measures and algorithms and may produce varying results.
+As we can see from the results, NM3 has the highest predicted rating for 2 out of the 3 models. This just shows how recommender systems can be built using different distance measures and algorithms that may produce varying results.
 
-The *recommenderlab* library also provides ways to measure models against each other. To show this, we will need a bigger dataset. We will use a larger dataset of movie ratings from [Netflix](https://www.kaggle.com/datasets/netflix-inc/netflix-prize-data). We did some pre-processing on the data to construct it into a utility matrix format. To check that function, you can check [here](https://github.com/erictria/cf-tutorial/blob/main/Netflix.ipynb) and you can also download the csv file [here](https://github.com/erictria/cf-tutorial/blob/main/unscaled_title_data.csv).
+The *recommenderlab* library also provides ways to measure models against each other. To show this, we will need a bigger dataset. We will use a larger dataset of movie ratings from [Netflix](https://www.kaggle.com/datasets/netflix-inc/netflix-prize-data) in 2019. We did some pre-processing on the data to construct it into a utility matrix format. To check that function, you can read the code [here](https://github.com/erictria/cf-tutorial/blob/main/Netflix.ipynb) and you can also download the csv file [here](https://github.com/erictria/cf-tutorial/blob/main/unscaled_title_data.csv).
 
 ```{r}
 netflix <- read.csv('unscaled_title_data.csv')
@@ -462,7 +461,7 @@ netflix_reco_uv <- Recommender(getData(split_data, "train"), "SVDF",
       param=list(k = 4))
 ```
 
-The *calcPredictioAccuracy* function calculates the Root Mean Square Error (RMSE), Mean Squared Error (MSE), and Mean Absolute Error (MAE)s for each of the models. This follows an approach suggested in the *recommenderlab* package, where we first use the known portion of the test set to make predictions and then calculate the error between those predictions and the test data's unknown portion ([Topor](https://rpubs.com/jt_rpubs/285729)).
+The *calcPredictioAccuracy* function calculates the Root Mean Square Error (RMSE), Mean Squared Error (MSE), and Mean Absolute Error (MAE)s for each of the models. This follows an approach suggested in the *recommenderlab* package, where we first use the known portion of the test set to make predictions and then calculate the error between those predictions and the test data's unknown portion ([Topor, 2017](https://rpubs.com/jt_rpubs/285729)).
 ```{r}
 netflix_predictions <- predict(netflix_reco, getData(split_data, "known"), type="ratings")
 netflix_predictions_centered <- predict(netflix_reco_centered, getData(split_data, "known"), type="ratings")
@@ -478,7 +477,7 @@ error_results
 
 From these results, we can see that the Cosine Normalized model produced the lowest RMSE and MSE values for the Netflix data.
 
-We discussed a few ways to create and test recommendation models in this section, but there are many more for you to explore. If you want to explore other methods, Topor discusses a lot of interesting variations in his [article](https://rpubs.com/jt_rpubs/285729). The *recommenderlab* [documentation](https://cran.r-project.org/web/packages/recommenderlab/) and [code repository](https://github.com/cran/recommenderlab) are also very detailed and good places to start. 
+In this section, we discussed a few ways to create and test recommendation models in this section, but there are many more for you to explore. If you want to explore other methods, Topor (2017) discusses a lot of interesting variations in his [article](https://rpubs.com/jt_rpubs/285729). The *recommenderlab* [documentation](https://cran.r-project.org/web/packages/recommenderlab/) and [code repository](https://github.com/cran/recommenderlab) are also very detailed and good places to start. 
 
 :::
 
@@ -704,6 +703,7 @@ Using cosine similarity, we were able to create a simple Collaborative Filtering
 
 # Conclusion
 
+After discussing the background concepts, mathematical theory, and different coding implementations of collaborative filtering, we can see that there are different ways to make recommendations. The idea behind it is very intuitive, and the mathematics and coding techniques help out in putting those ideas to action. From the simple hypothetical movie scenario to a bigger example using Netflix data, we were able to witness the capabilities of these recommendation systems. It doesn't stop there! The topic of recommendation systems has a lot of different branches and methods - all of which are exciting to learn. We have provided the references we have used for this tutorial so that you can explore even more. Happy learning! 
 
 # References
 
@@ -719,6 +719,6 @@ Shummon Maas, L., (2019, June 11). Recommendation Systems using UV-Decomposition
 
 Topor, J., (2017, June 11). User-Based and Item-Based Collaborative Filtering. RPubs. Retrieved December 13, 2022, from https://rpubs.com/jt_rpubs/285729
 
-Ullman, J., Leskovec, J., Rajaraman, A., (2012, July 4). Mining Massive Datasets: Chapter 9. Cambridge University Press. Retrieved December 7, 2022, from http://infolab.stanford.edu/~ullman/mmds/ch9.pdf and http://infolab.stanford.edu/~ullman/mmds/book.pdf 
+Ullman, J., Leskovec, J., Rajaraman, A., (2014, July 4). Mining Massive Datasets: Chapter 9. Cambridge University Press. Retrieved December 7, 2022, from http://infolab.stanford.edu/~ullman/mmds/ch9.pdf and http://infolab.stanford.edu/~ullman/mmds/book.pdf 
 
 
